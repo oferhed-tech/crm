@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#1f4e79">
+<title>CRM פניות</title>
+<style>
+  :root{
+    --bg:#f3f5f8; --card:#ffffff; --ink:#1b2430; --muted:#6b7686; --line:#e3e7ee;
+    --brand:#1f4e79; --brand2:#2f6fab; --ok:#1e8e5a; --warn:#d98a00; --bad:#c9372c;
+    --wa:#25d366; --chip:#eaf1f8;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif;background:var(--bg);color:var(--ink);font-size:16px}
+  header{position:sticky;top:0;z-index:5;background:var(--brand);color:#fff;padding:12px 16px 10px;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+  .top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+  h1{font-size:19px;margin:0;font-weight:700}
+  .iconbtn{background:rgba(255,255,255,.15);border:0;color:#fff;border-radius:10px;padding:8px 12px;font-size:15px}
+  .stats{display:flex;gap:8px;margin-top:10px}
+  .stat{flex:1;background:rgba(255,255,255,.12);border-radius:12px;padding:8px;text-align:center}
+  .stat b{display:block;font-size:22px}
+  .stat span{font-size:12px;opacity:.9}
+  .stat.red b{color:#ffb3ac}
+  .bar{padding:10px 16px 0}
+  .search{width:100%;border:1px solid var(--line);border-radius:12px;padding:11px 14px;font-size:16px;background:#fff}
+  .tabs,.depts{display:flex;gap:6px;overflow-x:auto;padding:10px 16px 4px;scrollbar-width:none}
+  .tabs::-webkit-scrollbar,.depts::-webkit-scrollbar{display:none}
+  .tab{flex:none;border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 14px;font-size:14px;color:var(--ink)}
+  .tab.on{background:var(--brand);border-color:var(--brand);color:#fff}
+  .depts .tab{font-size:13px;padding:5px 12px}
+  .depts .tab.on{background:var(--brand2);border-color:var(--brand2)}
+  #list{padding:8px 16px 90px}
+  .card{background:var(--card);border-radius:14px;padding:12px 14px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.06);border-right:5px solid var(--line)}
+  .card.urgent{border-right-color:var(--bad)}
+  .card.stale{border-right-color:var(--warn)}
+  .card.done{opacity:.65}
+  .row1{display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .name{font-weight:700;font-size:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .age{font-size:12px;color:var(--muted);flex:none}
+  .sum{font-size:14px;color:#334;margin:6px 0 8px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .tags{display:flex;gap:6px;flex-wrap:wrap}
+  .tag{font-size:12px;background:var(--chip);color:var(--brand);border-radius:6px;padding:2px 8px}
+  .tag.r{background:#fde8e6;color:var(--bad)}
+  .tag.g{background:#e3f5ec;color:var(--ok)}
+  .tag.y{background:#fff3dc;color:#9a6200}
+  .empty{text-align:center;color:var(--muted);padding:40px 10px}
+  /* detail */
+  #detail{position:fixed;inset:0;background:var(--bg);z-index:10;overflow-y:auto;display:none}
+  #detail.open{display:block}
+  .dhead{position:sticky;top:0;background:var(--brand);color:#fff;padding:12px 16px;display:flex;align-items:center;gap:10px;z-index:2}
+  .dhead h2{font-size:17px;margin:0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .sec{background:#fff;margin:10px 16px;border-radius:14px;padding:12px 14px}
+  .sec h3{font-size:13px;color:var(--muted);margin:0 0 6px;font-weight:600}
+  .sec p{margin:0;font-size:15px;line-height:1.5;white-space:pre-wrap}
+  .actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 16px}
+  .btn{border:0;border-radius:12px;padding:13px 10px;font-size:15px;font-weight:600;color:#fff;background:var(--brand2);text-align:center;text-decoration:none;display:block}
+  .btn.wa{background:var(--wa);grid-column:1/-1;font-size:17px;padding:15px}
+  .btn.ok{background:var(--ok)}
+  .btn.warn{background:var(--warn)}
+  .btn.ghost{background:#fff;color:var(--brand);border:1px solid var(--line)}
+  .btn:disabled{opacity:.5}
+  textarea,input,select{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px;font-size:16px;font-family:inherit;background:#fbfcfe}
+  textarea{min-height:110px;resize:vertical}
+  .inline{display:flex;gap:8px;margin-top:8px}
+  .inline .btn{flex:none;padding:10px 14px}
+  .tpls{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+  .tpl{font-size:13px;border:1px solid var(--line);background:#fff;border-radius:999px;padding:6px 10px}
+  #toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#222;color:#fff;padding:10px 18px;border-radius:999px;font-size:14px;opacity:0;transition:.25s;z-index:20;pointer-events:none}
+  #toast.show{opacity:.95}
+  #report{margin:10px 16px 0;background:#fff8e6;border:1px solid #f3dfae;border-radius:12px;padding:10px 12px;font-size:13px;display:none}
+  .fab{position:fixed;left:18px;bottom:22px;width:62px;height:62px;border-radius:50%;border:0;background:var(--brand);color:#fff;font-size:28px;box-shadow:0 6px 16px rgba(0,0,0,.25);z-index:8}
+  .sheet{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:15;display:none;align-items:flex-end}
+  .sheet.open{display:flex}
+  .sheet .box{background:var(--bg);width:100%;max-height:92vh;overflow-y:auto;border-radius:18px 18px 0 0;padding:14px 16px 24px}
+  .sheet h2{margin:0 0 10px;font-size:18px;display:flex;justify-content:space-between;align-items:center}
+  .sheet .x{border:0;background:#fff;border-radius:10px;padding:6px 12px;font-size:16px}
+  .hint{font-size:12px;color:var(--muted);margin:6px 2px}
+  .mic{border:0;border-radius:50%;width:56px;height:56px;font-size:24px;background:var(--bad);color:#fff;flex:none}
+  .mic.on{animation:pulse 1s infinite}
+  @keyframes pulse{50%{transform:scale(1.1);opacity:.7}}
+  .reply{background:#fff;border-radius:14px;padding:12px 14px;margin-top:12px;font-size:15px;line-height:1.5;white-space:pre-wrap}
+  .res{background:#fff;border-radius:14px;padding:12px 14px;margin-top:10px}
+  .res .btn{margin-top:8px}
+  .ex{font-size:13px;border:1px solid var(--line);background:#fff;border-radius:999px;padding:6px 10px;margin:4px 0 0 4px;display:inline-block}
+  pre.rep{white-space:pre-wrap;font-family:inherit;font-size:14px;line-height:1.55;margin:0}
+  .spin{text-align:center;padding:50px;color:var(--muted)}
+</style>
+</head>
+<body>
+<header>
+  <div class="top">
+    <h1>📋 פניות</h1>
+    <div style="display:flex;gap:6px">
+      <button class="iconbtn" onclick="openReports()">📊 דוח</button>
+      <button class="iconbtn" onclick="load()">⟳</button>
+    </div>
+  </div>
+  <div class="stats">
+    <div class="stat"><b id="sOpen">–</b><span>פתוחות</span></div>
+    <div class="stat red"><b id="sUrg">–</b><span>דחופות</span></div>
+    <div class="stat"><b id="sStale">–</b><span>תקועות 48ש׳+</span></div>
+    <div class="stat"><b id="sToday">–</b><span>נכנסו היום</span></div>
+  </div>
+</header>
+
+<div id="report"></div>
+<div class="bar"><input class="search" id="q" placeholder="🔍 חיפוש שם, טלפון או נושא…" oninput="render()"></div>
+<div class="tabs" id="tabs"></div>
+<div class="depts" id="depts"></div>
+<div id="list"><div class="spin">טוען…</div></div>
+
+<div id="detail"></div>
+<div id="toast"></div>
+<button class="fab" onclick="openCmd()" aria-label="פקודה קולית">🎤</button>
+
+<div class="sheet" id="cmdSheet" onclick="if(event.target===this)closeSheet('cmdSheet')">
+  <div class="box">
+    <h2>🎤 מה לעשות? <button class="x" onclick="closeSheet('cmdSheet')">✕</button></h2>
+    <div class="inline" style="align-items:center">
+      <button class="mic" id="micBtn" onclick="toggleMic()">🎤</button>
+      <textarea id="cmd" style="min-height:70px" placeholder="דבר או כתוב… למשל: תסמן את הפנייה של יסמין כטופל"></textarea>
+    </div>
+    <div class="hint" id="micHint">לחץ על המיקרופון ודבר. אם הוא לא עובד – לחץ בתיבה והשתמש במיקרופון של המקלדת.</div>
+    <button class="btn" style="width:100%;margin-top:6px" id="cmdGo" onclick="sendCmd()">בצע</button>
+    <div>
+      <span class="ex" onclick="ex(this)">מה הפניות הדחופות שלי?</span>
+      <span class="ex" onclick="ex(this)">מה נכנס היום?</span>
+      <span class="ex" onclick="ex(this)">תכתוב לדוד גביזון שהאולם פנוי ביום חמישי</span>
+      <span class="ex" onclick="ex(this)">תסמן את הפנייה של יסמין כטופל</span>
+      <span class="ex" onclick="ex(this)">תפתח פנייה חדשה: משה כהן, בור בכביש ברחוב הרצל</span>
+    </div>
+    <div id="cmdOut"></div>
+  </div>
+</div>
+
+<div class="sheet" id="repSheet" onclick="if(event.target===this)closeSheet('repSheet')">
+  <div class="box">
+    <h2>📊 דוח מצב <button class="x" onclick="closeSheet('repSheet')">✕</button></h2>
+    <div id="repOut"><div class="spin">טוען…</div></div>
+  </div>
+</div>
+
+<script>
+const DEPTS = ['חינוך','הנדסה','רווחה','תברואה','אחר'];
+const TABS = [
+  {k:'open', t:'פתוחות'}, {k:'urgent', t:'🔴 דחופות'}, {k:'stale', t:'⏳ תקועות'},
+  {k:'progress', t:'בטיפול'}, {k:'done', t:'טופלו'}, {k:'all', t:'הכל'}
+];
+let S = { items:[], templates:[], tab:'open', dept:'', cur:null };
+
+/* ---------- server bridge: the page talks to the Apps Script "engine" ---------- */
+const CFG = (() => {
+  let api = '', k = '';
+  try { api = localStorage.getItem('crm_api') || ''; k = localStorage.getItem('crm_k') || ''; } catch(e){}
+  // a setup link may carry the settings after #  (…/#api=…&k=…)
+  const h = new URLSearchParams(location.hash.slice(1));
+  if (h.get('api') && h.get('k')) {
+    api = h.get('api'); k = h.get('k');
+    try { localStorage.setItem('crm_api', api); localStorage.setItem('crm_k', k); } catch(e){}
+    history.replaceState(null, '', location.pathname);
+  }
+  return { api, k };
+})();
+const DEMO_MODE = /[?&]demo/.test(location.search);
+
+function call(fn, ...args){
+  if (DEMO_MODE) return Promise.resolve(DEMO[fn] ? DEMO[fn](...args) : null);
+  if (!CFG.api || !CFG.k) { showSetup(); return Promise.reject(new Error('NOT_SET_UP')); }
+  return fetch(CFG.api, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },  // simple request – no CORS preflight
+    body: JSON.stringify({ k: CFG.k, fn, args })
+  }).then(r => r.json()).then(j => {
+    if (!j.ok) {
+      if (j.error === 'UNAUTHORIZED') showSetup('קוד הגישה לא נכון');
+      throw new Error(j.error);
+    }
+    return j.result;
+  });
+}
+
+/* ---------- first-time setup (saved on this phone only) ---------- */
+function showSetup(msg){
+  if (document.getElementById('setup')) return;
+  const d = document.createElement('div');
+  d.id = 'setup'; d.className = 'sheet open';
+  d.innerHTML = `<div class="box">
+    <h2>⚙️ חיבור לגיליון</h2>
+    ${msg ? `<div class="reply">⚠️ ${esc(msg)}</div>` : ''}
+    <div class="hint">פעם אחת בלבד – נשמר בטלפון הזה.</div>
+    <label class="hint">כתובת ה-Web App (מסתיימת ב-/exec)</label>
+    <input class="search" id="setApi" dir="ltr" value="${esc(CFG.api)}" placeholder="https://script.google.com/macros/s/.../exec">
+    <label class="hint">קוד גישה</label>
+    <input class="search" id="setK" dir="ltr" value="${esc(CFG.k)}">
+    <button class="btn" style="width:100%;margin-top:10px" onclick="saveSetup()">שמור והתחבר</button>
+  </div>`;
+  document.body.appendChild(d);
+}
+function saveSetup(){
+  const api = document.getElementById('setApi').value.trim(), k = document.getElementById('setK').value.trim();
+  if (!/^https:\/\/script\.google\.com\/.+\/exec$/.test(api) || !k) { toast('בדוק את הכתובת והקוד'); return; }
+  try { localStorage.setItem('crm_api', api); localStorage.setItem('crm_k', k); } catch(e){}
+  location.reload();
+}
+
+/* ---------- helpers ---------- */
+function parseDate(s){
+  const m = /(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2}))?/.exec(s||'');
+  if(!m) return null;
+  return new Date(+m[3], +m[2]-1, +m[1], +(m[4]||0), +(m[5]||0));
+}
+function ageText(d){
+  if(!d) return '';
+  const h = (Date.now()-d)/36e5;
+  if(h < 1) return 'לפני ' + Math.max(1,Math.round(h*60)) + ' דק׳';
+  if(h < 24) return 'לפני ' + Math.round(h) + ' שע׳';
+  const days = Math.round(h/24);
+  return days === 1 ? 'אתמול' : 'לפני ' + days + ' ימים';
+}
+const isDone = i => (i.status||'').trim() === 'טופל';
+const isUrgent = i => /דחוף/.test(i.urgency||'');
+function lastTouch(i){ return parseDate(i.updated) || parseDate(i.opened); }
+const isStale = i => !isDone(i) && lastTouch(i) && (Date.now()-lastTouch(i)) > 48*36e5;
+function esc(s){ return String(s||'').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function digits(p){
+  let d = String(p||'').replace(/[^0-9]/g,'');
+  if(!d) return '';
+  if(d[0]==='0') d = '972'+d.slice(1);
+  else if(d[0]==='5' && d.length===9) d = '972'+d;
+  return d;
+}
+function displayName(i){ return i.name || i.phone || 'ללא שם'; }
+function firstName(i){
+  const n = (i.name||'').replace(/[@#]/g,'').trim().split(/\s+/)[0];
+  return n || '';
+}
+function toast(t){ const el=document.getElementById('toast'); el.textContent=t; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),1800); }
+
+/* ---------- load & render ---------- */
+async function load(){
+  document.getElementById('list').innerHTML = '<div class="spin">טוען…</div>';
+  try{
+    const d = await call('getData');
+    S.items = d.items || []; S.templates = d.templates || [];
+    render();
+    call('getLastReport').then(r => {
+      const el = document.getElementById('report');
+      if(r && r.text){ el.style.display='block'; el.innerHTML = '🤖 <b>דוח העוזר האחרון</b> (' + esc(r.date) + '): ' + esc(r.text); }
+    }).catch(()=>{});
+  }catch(e){
+    document.getElementById('list').innerHTML = '<div class="empty">שגיאה בטעינה: ' + esc(e.message||e) + '</div>';
+  }
+}
+
+function render(){
+  const open = S.items.filter(i => !isDone(i));
+  const today = new Date(); today.setHours(0,0,0,0);
+  document.getElementById('sOpen').textContent = open.length;
+  document.getElementById('sUrg').textContent = open.filter(isUrgent).length;
+  document.getElementById('sStale').textContent = open.filter(isStale).length;
+  document.getElementById('sToday').textContent = S.items.filter(i => (parseDate(i.opened)||0) >= today).length;
+
+  document.getElementById('tabs').innerHTML = TABS.map(t =>
+    `<button class="tab ${S.tab===t.k?'on':''}" onclick="S.tab='${t.k}';render()">${t.t}</button>`).join('');
+  document.getElementById('depts').innerHTML = ['', ...DEPTS].map(d =>
+    `<button class="tab ${S.dept===d?'on':''}" onclick="S.dept='${d}';render()">${d||'כל המחלקות'}</button>`).join('');
+
+  const q = document.getElementById('q').value.trim();
+  let list = S.items.filter(i => {
+    switch(S.tab){
+      case 'open': return !isDone(i);
+      case 'urgent': return !isDone(i) && isUrgent(i);
+      case 'stale': return isStale(i);
+      case 'progress': return (i.status||'') === 'בטיפול';
+      case 'done': return isDone(i);
+      default: return true;
+    }
+  });
+  if(S.dept) list = list.filter(i => (i.dept||'אחר') === S.dept);
+  if(q) list = list.filter(i => [i.name,i.phone,i.summary,i.task,i.lastMsg,i.id].join(' ').includes(q));
+  if(S.tab==='open' || S.tab==='urgent') list.sort((a,b) => (isUrgent(b)-isUrgent(a)) || ((lastTouch(b)||0)-(lastTouch(a)||0)));
+
+  const el = document.getElementById('list');
+  if(!list.length){ el.innerHTML = '<div class="empty">אין פניות להצגה 🎉</div>'; return; }
+  el.innerHTML = list.slice(0,200).map(i => {
+    const cls = isDone(i) ? 'done' : isUrgent(i) ? 'urgent' : isStale(i) ? 'stale' : '';
+    return `<div class="card ${cls}" onclick="openItem('${esc(i.id)}')">
+      <div class="row1"><div class="name">${esc(displayName(i))}</div><div class="age">${ageText(lastTouch(i))}</div></div>
+      <div class="sum">${esc(i.summary || i.lastMsg)}</div>
+      <div class="tags">
+        ${isUrgent(i)?'<span class="tag r">דחוף</span>':''}
+        <span class="tag">${esc(i.dept||'אחר')}</span>
+        <span class="tag ${isDone(i)?'g':(i.status==='בטיפול'?'y':'')}">${esc(i.status||'חדש')}</span>
+        ${i.source==='Gmail'?'<span class="tag">📧 מייל</span>':''}
+        ${+i.prev>0?`<span class="tag y">פונה חוזר</span>`:''}
+      </div></div>`;
+  }).join('');
+}
+
+/* ---------- detail ---------- */
+function openItem(id){
+  S.cur = S.items.find(i => i.id === id);
+  if(!S.cur) return;
+  drawDetail();
+  document.getElementById('detail').classList.add('open');
+  history.pushState({d:1}, '');
+}
+function closeItem(){ document.getElementById('detail').classList.remove('open'); S.cur=null; render(); }
+window.onpopstate = () => { if(S.cur) closeItem(); };
+
+// phone from column D, or the one the sheet found in the contacts tab (column R link)
+function phoneOf(i){
+  if (i.phone) return i.phone;
+  const m = /wa\.me\/(\d{8,15})/.exec(i.link || '');
+  return m ? m[1] : '';
+}
+function waLink(i, text){
+  const d = digits(phoneOf(i));
+  return 'https://wa.me/' + d + '?text=' + encodeURIComponent(text || '');
+}
+
+function drawDetail(){
+  const i = S.cur;
+  const tplBtns = S.templates.map((t,k) => `<button class="tpl" onclick="useTpl(${k})">${esc(t.topic)}</button>`).join('');
+  document.getElementById('detail').innerHTML = `
+    <div class="dhead"><button class="iconbtn" onclick="history.back()">→</button><h2>${esc(displayName(i))}</h2></div>
+    <div class="sec">
+      <div class="tags" style="margin-bottom:8px">
+        ${isUrgent(i)?'<span class="tag r">דחוף</span>':''}
+        <span class="tag">${esc(i.dept||'אחר')}</span>
+        <span class="tag">${esc(i.status||'חדש')}</span>
+        <span class="tag">${esc(i.id)}</span>
+      </div>
+      <h3>תקציר</h3><p>${esc(i.summary)}</p>
+      ${i.task?`<h3 style="margin-top:10px">משימה</h3><p>${esc(i.task)}</p>`:''}
+      ${i.lastMsg?`<h3 style="margin-top:10px">הודעה אחרונה</h3><p>${esc(i.lastMsg)}</p>`:''}
+      <h3 style="margin-top:10px">נפתח</h3><p>${esc(i.opened)} · ${esc(i.msgCount||1)} הודעות${+i.prev>0?' · '+esc(i.prev)+' פניות קודמות':''}</p>
+    </div>
+    ${i.actions?`<div class="sec"><h3>🤖 צעדים מומלצים</h3><p>${esc(i.actions)}</p></div>`:''}
+
+    <div class="sec">
+      <h3>✍️ תשובה מוכנה</h3>
+      <textarea id="draft">${esc(i.draft)}</textarea>
+      ${tplBtns?`<div class="tpls">${tplBtns}</div>`:''}
+    </div>
+    <div class="actions">
+      <a class="btn wa" id="waBtn" href="#" onclick="sendWa(event)">💬 ${phoneOf(i)?'פתח בוואטסאפ עם התשובה':'וואטסאפ – לבחור איש קשר'}</a>
+      ${phoneOf(i)?`<a class="btn ghost" href="tel:+${esc(digits(phoneOf(i)))}">📞 התקשר</a>`:''}
+      ${i.email?`<a class="btn ghost" href="mailto:${esc(i.email)}?body=${encodeURIComponent(i.draft||'')}">✉️ מייל</a>`:''}
+      <button class="btn ghost" onclick="saveDraft()">💾 שמור טיוטה</button>
+      ${!isDone(i)?`<button class="btn ok" onclick="setStatus('טופל')">✅ טופל</button>`:`<button class="btn warn" onclick="setStatus('חדש')">↩️ פתח מחדש</button>`}
+      ${i.status!=='בטיפול'&&!isDone(i)?`<button class="btn warn" onclick="setStatus('בטיפול')">⏳ בטיפול</button>`:''}
+      <button class="btn ghost" onclick="openCmd(S.cur.id)">🎤 פקודה על הפנייה</button>
+      <button class="btn ghost" onclick="toggleUrgent()">${isUrgent(i)?'⬇️ לא דחוף':'🔴 סמן דחוף'}</button>
+    </div>
+
+    <div class="sec">
+      <h3>מחלקה</h3>
+      <select onchange="setField('dept', this.value, 'מחלקה: '+this.value)">
+        ${DEPTS.map(d=>`<option ${d===(i.dept||'אחר')?'selected':''}>${d}</option>`).join('')}
+      </select>
+      ${!phoneOf(i)?`<h3 style="margin-top:12px">טלפון (חסר)</h3>
+        <div class="inline"><input id="ph" type="tel" placeholder="05X-XXXXXXX"><button class="btn" onclick="savePhone()">שמור</button></div>`:''}
+    </div>
+
+    <div class="sec">
+      <h3>📝 תיעוד טיפול</h3>
+      <p style="font-size:14px;color:#445">${esc(i.log)||'—'}</p>
+      <div class="inline"><input id="note" placeholder="הוסף הערה…"><button class="btn" onclick="addNote()">הוסף</button></div>
+    </div>
+    <div style="height:30px"></div>`;
+}
+
+function useTpl(k){
+  const t = S.templates[k]; if(!t) return;
+  const fn = firstName(S.cur);
+  document.getElementById('draft').value = t.text.replace(/\{שם\}/g, fn).replace(/\s+,/g, ',').replace(/^היי\s*,/,'היי,');
+  toast('התבנית הוכנסה – אפשר לערוך');
+}
+
+async function save(fields, note, msg){
+  const i = S.cur;
+  const ta = document.getElementById('draft');
+  const typed = ta ? ta.value : null;
+  try{
+    const upd = await call('updateItem', i.id, i.row, fields, note);
+    if(upd){ Object.assign(i, upd); }
+    else { Object.assign(i, fields); if(note) i.log = (i.log?i.log+'\n':'') + '📱 ' + note; }
+    drawDetail();
+    if(typed !== null && !('draft' in fields)) document.getElementById('draft').value = typed;
+    toast(msg || 'נשמר ✓');
+  }catch(e){
+    const m = String(e.message||e);
+    toast(m.includes('NOT_FOUND') ? 'הפנייה עברה לארכיון – לחץ רענון' : 'שגיאה: ' + m);
+  }
+}
+function saveDraft(){ return save({draft: document.getElementById('draft').value}, '', 'הטיוטה נשמרה ✓'); }
+function setStatus(s){ return save({status: s}, 'סטטוס: ' + s, s==='טופל'?'סומן כטופל ✅':'עודכן ✓'); }
+function toggleUrgent(){ const u = isUrgent(S.cur) ? 'רגיל' : 'דחוף'; return save({urgency: u}, 'דחיפות: ' + u); }
+function setField(k, v, note){ return save({[k]: v}, note); }
+function savePhone(){ const v=document.getElementById('ph').value.trim(); if(v) save({phone: v}, 'נוסף טלפון'); }
+function addNote(){ const v=document.getElementById('note').value.trim(); if(v) save({}, v, 'ההערה נוספה ✓'); }
+
+async function sendWa(e){
+  e.preventDefault();
+  const i = S.cur, text = document.getElementById('draft').value;
+  const url = waLink(i, text);
+  window.open(url, '_blank');
+  // שומר את הטיוטה ומתעד – בלי לסגור את הפנייה
+  call('updateItem', i.id, i.row, text!==i.draft?{draft:text}:{}, 'נפתח וואטסאפ עם תשובה').then(u => { if(u) Object.assign(i,u); }).catch(()=>{});
+}
+
+/* ---------- voice / text commands ---------- */
+let REC = null, CMD_ID = null;
+function openCmd(id){
+  CMD_ID = id || null;
+  document.getElementById('cmdOut').innerHTML = '';
+  document.getElementById('cmd').value = '';
+  document.getElementById('cmdSheet').classList.add('open');
+  setTimeout(toggleMic, 250);
+}
+function closeSheet(id){ document.getElementById(id).classList.remove('open'); if(REC){ try{REC.stop()}catch(e){} } }
+function ex(el){ document.getElementById('cmd').value = el.textContent; sendCmd(); }
+function toggleMic(){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const btn = document.getElementById('micBtn');
+  if(!SR){ document.getElementById('micHint').textContent = 'הדפדפן לא תומך בהקלטה כאן – לחץ בתיבה והשתמש במיקרופון של המקלדת.'; document.getElementById('cmd').focus(); return; }
+  if(REC){ try{REC.stop()}catch(e){}; return; }
+  REC = new SR(); REC.lang = 'he-IL'; REC.interimResults = true; REC.continuous = false;
+  REC.onresult = e => { document.getElementById('cmd').value = Array.from(e.results).map(r=>r[0].transcript).join(' '); };
+  REC.onerror = e => {
+    const msg = {
+      'not-allowed': 'אין הרשאה למיקרופון – לחץ על סמל המנעול ליד הכתובת ← הרשאות ← מיקרופון ← אפשר.',
+      'no-speech': 'לא שמעתי כלום – לחץ שוב ודבר.',
+      'network': 'אין חיבור לאינטרנט לזיהוי הדיבור.'
+    }[e.error] || ('המיקרופון לא זמין (' + e.error + ') – אפשר להשתמש במיקרופון של המקלדת.');
+    document.getElementById('micHint').textContent = msg;
+  };
+  REC.onend = () => { btn.classList.remove('on'); const t = document.getElementById('cmd').value.trim(); REC = null; if(t) sendCmd(); };
+  try{ REC.start(); btn.classList.add('on'); }catch(e){ REC = null; }
+}
+function say(t){
+  try{ if(!t || !window.speechSynthesis) return; const u = new SpeechSynthesisUtterance(t); u.lang='he-IL'; speechSynthesis.cancel(); speechSynthesis.speak(u); }catch(e){}
+}
+async function sendCmd(){
+  const text = document.getElementById('cmd').value.trim(); if(!text) return;
+  const out = document.getElementById('cmdOut'), go = document.getElementById('cmdGo');
+  go.disabled = true; out.innerHTML = '<div class="spin">חושב…</div>';
+  try{
+    const r = await call('runCommand', text, CMD_ID);
+    let html = r.reply ? `<div class="reply">${esc(r.reply)}</div>` : '';
+    (r.done||[]).forEach((a,k) => {
+      if(a.type==='update' && a.item){
+        mergeItem(a.item);
+        html += `<div class="res">✅ עודכן: <b>${esc(displayName(a.item))}</b> – ${esc(a.item.status)} · ${esc(a.item.dept)}${isUrgent(a.item)?' · דחוף':''}
+          <button class="btn ghost" onclick="closeSheet('cmdSheet');openItem('${esc(a.item.id)}')">פתח פנייה</button></div>`;
+      } else if(a.type==='create' && a.item){
+        S.items.unshift(a.item);
+        html += `<div class="res">🆕 נפתחה פנייה: <b>${esc(displayName(a.item))}</b> – ${esc(a.item.summary)}
+          <button class="btn ghost" onclick="closeSheet('cmdSheet');openItem('${esc(a.item.id)}')">פתח פנייה</button></div>`;
+      } else if(a.type==='whatsapp'){
+        const d = digits(a.phone);
+        const url = 'https://wa.me/' + d + '?text=' + encodeURIComponent(a.text||'');
+        const opts = (a.options||[]).filter(o => digits(o.phone) !== d).map(o =>
+          `<a class="btn ghost" target="_blank" href="https://wa.me/${digits(o.phone)}?text=${encodeURIComponent(a.text||'')}">אולי: ${esc(o.name)}</a>`).join('');
+        html += `<div class="res">💬 הודעה ל<b>${esc(a.name||'')}</b>${d?'':' (לא נמצא מספר – תבחר איש קשר)'}:
+          <p style="margin:6px 0;white-space:pre-wrap">${esc(a.text)}</p>
+          <a class="btn wa" target="_blank" href="${url}">💬 פתח בוואטסאפ ושלח</a>${opts}</div>`;
+      } else if(a.type==='open'){
+        html += `<button class="btn ghost" style="margin-top:10px;width:100%" onclick="closeSheet('cmdSheet');openItem('${esc(a.id)}')">פתח את הפנייה</button>`;
+      } else if(a.type==='error'){
+        html += `<div class="res">⚠️ ${esc(a.message)}</div>`;
+      }
+    });
+    out.innerHTML = html || '<div class="reply">לא הבנתי, נסה שוב במילים אחרות.</div>';
+    say(r.reply);
+    render(); if(S.cur) { S.cur = S.items.find(i=>i.id===S.cur.id) || S.cur; drawDetail(); }
+  }catch(e){
+    const m = String(e.message||e);
+    out.innerHTML = `<div class="reply">⚠️ ${m.includes('NO_KEY') ? 'חסר מפתח API – צריך להוסיף ANTHROPIC_API_KEY בהגדרות הסקריפט.' : esc(m)}</div>`;
+  }finally{ go.disabled = false; }
+}
+function mergeItem(u){ const k = S.items.findIndex(i => i.id === u.id); if(k>=0) Object.assign(S.items[k], u); else S.items.unshift(u); }
+
+/* ---------- reports ---------- */
+async function openReports(){
+  document.getElementById('repSheet').classList.add('open');
+  const out = document.getElementById('repOut'); out.innerHTML = '<div class="spin">טוען…</div>';
+  try{
+    const r = await call('getReports');
+    out.innerHTML = `<div class="res"><pre class="rep">${esc(r.live.text)}</pre></div>
+      <div class="actions" style="margin:10px 0">
+        <button class="btn" onclick="sendReportNow(this)">📧 שלח לי עכשיו למייל</button>
+        <button class="btn ghost" onclick="say(document.querySelector('pre.rep').textContent)">🔊 הקרא</button>
+      </div>
+      <h3 style="font-size:14px;color:var(--muted);margin:14px 2px 6px">דוחות קודמים</h3>
+      ${(r.history||[]).map(h => `<div class="res"><div class="age" style="margin-bottom:4px">${esc(h.date)}</div><pre class="rep">${esc(h.text)}</pre></div>`).join('') || '<div class="hint">אין עדיין</div>'}`;
+  }catch(e){ out.innerHTML = '<div class="reply">שגיאה: ' + esc(e.message||e) + '</div>'; }
+}
+async function sendReportNow(b){
+  b.disabled = true;
+  try{ await call('sendStatusReport', true); toast('הדוח נשלח למייל ✓'); }catch(e){ toast('שגיאה: ' + (e.message||e)); }
+  b.disabled = false;
+}
+
+/* ---------- demo data (only when opened outside Google) ---------- */
+const DEMO = {
+  getData: () => ({
+    templates: [{topic:'שיחה שלא נענתה', text:'היי {שם}, ראיתי שניסית להתקשר. אחזור אליך בהקדם.'},{topic:'חינוך', text:'שלום {שם}, העברתי את פנייתך לאגף החינוך.'}],
+    items: [
+      {row:5,id:'P-1',opened:'07/11/2026 08:10:00',updated:'07/11/2026 09:00:00',name:'יסמין ולקומיר',phone:'',dept:'תברואה',summary:'בקשה לריסוס בגן מפרשית – הילדים חוזרים עקוצים',task:'לבדוק מועד ריסוס',status:'חדש',urgency:'רגיל',draft:'בוקר טוב יסמין, העברתי לתברואה.',actions:'1. להעביר לתברואה\n2. לעדכן את הפונה',log:'',msgCount:'2',prev:'1'},
+      {row:4,id:'P-2',opened:'01/11/2026 10:00:00',updated:'02/11/2026 10:00:00',name:'מירית דבורה',phone:'0529330516',dept:'חינוך',summary:'פנייה דחופה בנושא שפ״ע',status:'בטיפול',urgency:'דחוף',draft:'',log:'📱 02/11 – הועבר',msgCount:'5',prev:'2'},
+      {row:3,id:'P-3',opened:'20/10/2026 10:00:00',name:'דן פנטירו',phone:'0523982771',dept:'אחר',summary:'תיאום פגישה',status:'טופל',urgency:'רגיל'}
+    ]}),
+  getLastReport: () => ({date:'07/11/2026 07:47', text:'3 חדשות, 1 דחופה, 40 פתוחות'}),
+  updateItem: (id,row,f,n) => null,
+  runCommand: (t) => ({reply:'הכנתי הודעה לדוד גביזון. סימנתי את הפנייה של יסמין כטופל.', done:[{type:'whatsapp',name:'דוד גביזון',phone:'0505553212',text:'היי דוד, האולם פנוי ביום חמישי.',options:[]},{type:'update',item:{id:'P-1',row:5,name:'יסמין ולקומיר',status:'טופל',dept:'תברואה',urgency:'רגיל',summary:'ריסוס'}}]}),
+  getReports: () => ({live:{text:'📋 דוח מצב – 08/11 12:00\nפתוחות: 2 · דחופות: 1 · תקועות 48ש׳+: 1\n\n🔴 דחופות:\n🔴 מירית דבורה · חינוך – שפ״ע'}, history:[{date:'08/11/2026 10:00',text:'📋 דוח מצב – 10:00\nפתוחות: 3'}]}),
+  sendStatusReport: () => ({})
+};
+
+load();
+</script>
+</body>
+</html>
