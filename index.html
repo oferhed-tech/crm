@@ -99,6 +99,7 @@
   .two>*{flex:1}
   .msum{background:#f6f2fd;border-radius:10px;padding:10px;font-size:15px;line-height:1.55;white-space:pre-wrap;margin-bottom:8px}
   .mic.sm{width:44px;height:44px;font-size:19px}
+  #sumSec{scroll-margin-top:70px}
 </style>
 </head>
 <body>
@@ -210,6 +211,8 @@ const CFG = (() => {
   return { api, k };
 })();
 const DEMO_MODE = /[?&]demo/.test(location.search);
+const OPEN_ID = new URLSearchParams(location.hash.slice(1)).get('open') || '';
+if (OPEN_ID) history.replaceState(null, '', location.pathname + location.search);
 
 function call(fn, ...args){
   if (DEMO_MODE) return Promise.resolve(DEMO[fn] ? DEMO[fn](...args) : null);
@@ -272,6 +275,7 @@ const isEvent = i => !!(i.type||'').trim();
 const whenOf = i => parseDate(i.when);
 const isLate = i => isEvent(i) && !isDone(i) && whenOf(i) && whenOf(i) < Date.now();
 const isStale = i => !isDone(i) && !isEvent(i) && lastTouch(i) && (Date.now()-lastTouch(i)) > 48*36e5;
+const needsSummary = i => i.type==='פגישה' && !isDone(i) && !i.msum && whenOf(i) && whenOf(i) < Date.now();
 function evTitle(i){ return String(i.summary||'').split(' – ')[0] || i.type; }
 function whenText(i){
   const d = whenOf(i); if(!d) return '';
@@ -304,6 +308,7 @@ async function load(){
     const d = await call('getData');
     S.items = d.items || []; S.templates = d.templates || [];
     render(); checkDue();
+    if (OPEN_ID && S.items.some(i => i.id === OPEN_ID)) openItem(OPEN_ID);
     call('getLastReport').then(r => {
       const el = document.getElementById('report');
       if(r && r.text){ el.style.display='block'; el.innerHTML = '🤖 <b>דוח העוזר האחרון</b> (' + esc(r.date) + '): ' + esc(r.text); }
@@ -367,14 +372,15 @@ function evCard(i){
   return `<div class="card ev ${isLate(i)?'late':''} ${isDone(i)?'done':''}" onclick="openItem('${esc(i.id)}')">
     <div class="row1"><div class="name">${i.type==='תזכורת'?'⏰':'🤝'} ${esc(evTitle(i))}</div><div class="when">${esc(whenText(i))}</div></div>
     ${i.name?`<div class="sum">עם ${esc(i.name)}</div>`:''}
-    <div class="tags"><span class="tag p">${esc(i.type)}</span>${isLate(i)?'<span class="tag r">עבר המועד</span>':''}${i.msum?'<span class="tag g">📝 יש סיכום</span>':''}</div></div>`;
+    <div class="tags"><span class="tag p">${esc(i.type)}</span>${isLate(i)&&!needsSummary(i)?'<span class="tag r">עבר המועד</span>':''}${i.msum?'<span class="tag g">📝 יש סיכום</span>':''}</div>
+    ${needsSummary(i)?`<button class="btn" style="width:100%;margin-top:8px;background:#c9372c" onclick="event.stopPropagation();openItem('${esc(i.id)}',true)">🎙️ הפגישה הסתיימה – הקלט סיכום</button>`:''}</div>`;
 }
 function renderAgenda(el, list){
   list.sort((a,b) => (whenOf(a)||0) - (whenOf(b)||0));
   const t0 = new Date(); t0.setHours(0,0,0,0);
   const t1 = new Date(t0.getTime()+864e5), t2 = new Date(t0.getTime()+2*864e5);
   const groups = [
-    ['עבר המועד – לסגור או לסכם', i => whenOf(i) && whenOf(i) < Date.now(), 'late'],
+    ['עבר המועד – לסכם או לסגור', i => whenOf(i) && whenOf(i) < Date.now(), 'late'],
     ['היום', i => whenOf(i) >= Date.now() && whenOf(i) < t1],
     ['מחר', i => whenOf(i) >= t1 && whenOf(i) < t2],
     ['בהמשך', i => whenOf(i) >= t2 || !whenOf(i)]
@@ -435,18 +441,30 @@ function checkDue(){
       toast(msg); say(msg);
       try{ if(window.Notification && Notification.permission==='granted') new Notification('CRM', {body: msg}); }catch(e){}
     }
+    // an hour after a meeting started: ask for the summary
+    const endKey = i.id + '@end';
+    if(needsSummary(i) && now - whenOf(i).getTime() > 36e5 && now - whenOf(i).getTime() < 12*36e5 && !seen[endKey]){
+      seen[endKey] = 1;
+      const msg = '🎙️ איך הייתה הפגישה "' + evTitle(i) + '"? לחץ כדי להקליט סיכום';
+      toast(msg);
+      try{ if(window.Notification && Notification.permission==='granted'){ const n = new Notification('CRM – סיכום פגישה', {body: msg}); n.onclick = () => { window.focus(); openItem(i.id, true); }; } }catch(e){}
+    }
   });
   try{ localStorage.setItem('crm_seen', JSON.stringify(seen)); }catch(e){}
 }
 setInterval(checkDue, 60000);
 
 /* ---------- detail ---------- */
-function openItem(id){
+function openItem(id, record){
   S.cur = S.items.find(i => i.id === id);
   if(!S.cur) return;
   drawDetail();
   document.getElementById('detail').classList.add('open');
   history.pushState({d:1}, '');
+  if(record || needsSummary(S.cur)){
+    const sec = document.getElementById('sumSec');
+    if(sec){ sec.scrollIntoView({behavior:'smooth', block:'start'}); if(record) setTimeout(() => dictate('sumNotes','sumMic'), 400); }
+  }
 }
 function closeItem(){ document.getElementById('detail').classList.remove('open'); S.cur=null; render(); }
 window.onpopstate = () => { if(S.cur) closeItem(); };
@@ -527,15 +545,21 @@ function evSections(i){
       <div class="two" style="margin-top:8px"><input id="evWhen" type="datetime-local" value="${toLocalInput(whenOf(i))}"><select id="evRem2" style="flex:.8">${opts}</select></div>
       <button class="btn ghost" style="width:100%;margin-top:8px" onclick="reschedule()">🔁 עדכן מועד ותזכורת</button>
     </div>
-    <div class="sec">
-      <h3>📝 סיכום ${i.type==='תזכורת'?'':'פגישה'}</h3>
+    <div class="sec" id="sumSec" style="${needsSummary(i)?'border:2px solid #c9372c':''}">
+      <h3>📝 סיכום ${i.type==='תזכורת'?'':'פגישה'} ${needsSummary(i)?'<span class="tag r">הפגישה הסתיימה – חסר סיכום</span>':''}</h3>
       ${i.msum?`<div class="msum">${esc(i.msum)}</div>`:''}
-      <div class="inline" style="align-items:flex-start">
-        <button class="mic sm" id="sumMic" onclick="dictate('sumNotes','sumMic')">🎤</button>
-        <textarea id="sumNotes" style="min-height:90px" placeholder="${i.msum?'להוסיף עוד…':'מה דובר? מה סוכם? מה צריך לעשות? אפשר להכתיב'}"></textarea>
+      <label class="hint" style="margin-top:4px">🗣️ מה היה בפגישה? (מה דובר, מה סוכם)</label>
+      <div class="inline" style="align-items:flex-start;margin-top:4px">
+        <button class="mic" id="sumMic" onclick="dictate('sumNotes','sumMic')">🎙️</button>
+        <textarea id="sumNotes" style="min-height:110px" placeholder="לחץ על 🎙️ ודבר, או הקלד…"></textarea>
       </div>
-      <button class="btn" style="width:100%;margin-top:8px;background:#5a32a3" id="sumGo" onclick="summarize()">✨ סכם עם Claude</button>
-      <div class="hint">Claude יכתוב סיכום, החלטות ומשימות המשך, ויכין הודעת סיכום לשליחה בוואטסאפ.</div>
+      <label class="hint">✅ מה צריך לעשות? (משימות, למי, עד מתי)</label>
+      <div class="inline" style="align-items:flex-start;margin-top:4px">
+        <button class="mic sm" id="todoMic" onclick="dictate('sumTodo','todoMic')">🎙️</button>
+        <textarea id="sumTodo" style="min-height:80px" placeholder="למשל: לשלוח רשימת גנים למיה עד חמישי"></textarea>
+      </div>
+      <button class="btn" style="width:100%;margin-top:10px;background:#5a32a3" id="sumGo" onclick="summarize()">✨ שמור וסכם עם Claude</button>
+      <div class="hint">Claude מסדר סיכום, החלטות ומשימות המשך, ומכין הודעת סיכום לשליחה בוואטסאפ. ${i.msum?'מה שתוסיף עכשיו יצטרף לסיכום הקיים.':''}</div>
     </div>`;
 }
 async function reschedule(){
@@ -545,12 +569,13 @@ async function reschedule(){
   catch(e){ toast('שגיאה: ' + (e.message||e)); }
 }
 async function summarize(){
-  const ta = document.getElementById('sumNotes'), notes = ta.value.trim();
-  if(!notes){ toast('כתוב או הכתב מה היה בפגישה'); return; }
+  if(DREC){ try{DREC.stop()}catch(e){} }
+  const notes = document.getElementById('sumNotes').value.trim(), todo = document.getElementById('sumTodo').value.trim();
+  if(!notes && !todo){ toast('הקלט או כתוב מה היה בפגישה'); return; }
   const b = document.getElementById('sumGo'); b.disabled = true; b.textContent = 'מסכם…';
   const full = S.cur.msum ? (S.cur.msum + '\n\nתוספת: ' + notes) : notes;
-  try{ const u = await call('saveMeetingSummary', S.cur.id, S.cur.row, full); Object.assign(S.cur, u); drawDetail(); toast('הסיכום נשמר ✓ – ההודעה מוכנה למטה'); }
-  catch(e){ toast('שגיאה: ' + (e.message||e)); b.disabled = false; b.textContent = '✨ סכם עם Claude'; }
+  try{ const u = await call('saveMeetingSummary', S.cur.id, S.cur.row, full, todo); Object.assign(S.cur, u); drawDetail(); toast('הסיכום נשמר ✓ – ההודעה מוכנה בתשובה המוכנה'); }
+  catch(e){ toast('שגיאה: ' + (e.message||e)); b.disabled = false; b.textContent = '✨ שמור וסכם עם Claude'; }
 }
 let DREC = null;
 function dictate(targetId, btnId){
