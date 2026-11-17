@@ -85,6 +85,20 @@
   .ex{font-size:13px;border:1px solid var(--line);background:#fff;border-radius:999px;padding:6px 10px;margin:4px 0 0 4px;display:inline-block}
   pre.rep{white-space:pre-wrap;font-family:inherit;font-size:14px;line-height:1.55;margin:0}
   .spin{text-align:center;padding:50px;color:var(--muted)}
+  .grp{font-size:13px;font-weight:700;color:var(--muted);margin:14px 2px 6px}
+  .grp.late{color:var(--bad)}
+  .card.ev{border-right-color:#7b4fc9}
+  .card.ev.late{border-right-color:var(--bad)}
+  .tag.p{background:#efe7fb;color:#5a32a3}
+  .when{font-size:13px;font-weight:700;color:#5a32a3;flex:none}
+  .seg{display:flex;gap:6px;margin-bottom:10px}
+  .seg button{flex:1;border:1px solid var(--line);background:#fff;border-radius:10px;padding:10px;font-size:15px}
+  .seg button.on{background:#5a32a3;border-color:#5a32a3;color:#fff}
+  label.hint{display:block;margin-top:10px}
+  .two{display:flex;gap:8px}
+  .two>*{flex:1}
+  .msum{background:#f6f2fd;border-radius:10px;padding:10px;font-size:15px;line-height:1.55;white-space:pre-wrap;margin-bottom:8px}
+  .mic.sm{width:44px;height:44px;font-size:19px}
 </style>
 </head>
 <body>
@@ -92,6 +106,7 @@
   <div class="top">
     <h1>📋 פניות</h1>
     <div style="display:flex;gap:6px">
+      <button class="iconbtn" onclick="openNewEvent()">➕ פגישה</button>
       <button class="iconbtn" onclick="openReports()">📊 דוח</button>
       <button class="iconbtn" onclick="load()">⟳</button>
     </div>
@@ -101,6 +116,7 @@
     <div class="stat red"><b id="sUrg">–</b><span>דחופות</span></div>
     <div class="stat"><b id="sStale">–</b><span>תקועות 48ש׳+</span></div>
     <div class="stat"><b id="sToday">–</b><span>נכנסו היום</span></div>
+    <div class="stat" onclick="S.tab='agenda';render()"><b id="sAgenda">–</b><span>📅 היום</span></div>
   </div>
 </header>
 
@@ -129,8 +145,39 @@
       <span class="ex" onclick="ex(this)">תכתוב לדוד גביזון שהאולם פנוי ביום חמישי</span>
       <span class="ex" onclick="ex(this)">תסמן את הפנייה של יסמין כטופל</span>
       <span class="ex" onclick="ex(this)">תפתח פנייה חדשה: משה כהן, בור בכביש ברחוב הרצל</span>
+      <span class="ex" onclick="ex(this)">תקבע לי פגישה עם משה כהן מחר ב-10 על תקציב ההסעות</span>
+      <span class="ex" onclick="ex(this)">תזכיר לי ביום ראשון ב-9 להתקשר לאילנה</span>
     </div>
     <div id="cmdOut"></div>
+  </div>
+</div>
+
+<div class="sheet" id="evSheet" onclick="if(event.target===this)closeSheet('evSheet')">
+  <div class="box">
+    <h2>📅 פגישה / תזכורת חדשה <button class="x" onclick="closeSheet('evSheet')">✕</button></h2>
+    <div class="seg"><button id="kM" class="on" onclick="setKind('פגישה')">🤝 פגישה</button><button id="kR" onclick="setKind('תזכורת')">⏰ תזכורת</button></div>
+    <label class="hint">נושא</label>
+    <input id="evTitle" placeholder="למשל: פגישה על הסעות לגן דולפין">
+    <div class="two">
+      <div><label class="hint">עם מי (לא חובה)</label><input id="evName" placeholder="שם"></div>
+      <div><label class="hint">טלפון (לא חובה)</label><input id="evPhone" type="tel" placeholder="05X-XXXXXXX"></div>
+    </div>
+    <div class="two">
+      <div><label class="hint">תאריך</label><input id="evDate" type="date"></div>
+      <div><label class="hint">שעה</label><input id="evTime" type="time"></div>
+    </div>
+    <div class="two">
+      <div><label class="hint">תזכורת</label>
+        <select id="evRemind">
+          <option value="0">בזמן עצמו</option><option value="10">10 דקות לפני</option><option value="30" selected>חצי שעה לפני</option>
+          <option value="60">שעה לפני</option><option value="120">שעתיים לפני</option><option value="1440">יום לפני</option>
+        </select></div>
+      <div><label class="hint">מחלקה</label><select id="evDept"></select></div>
+    </div>
+    <label class="hint">הערות</label>
+    <textarea id="evNotes" style="min-height:70px" placeholder="פרטים, כתובת, מה להכין…"></textarea>
+    <button class="btn" style="width:100%;margin-top:12px;background:#5a32a3" id="evGo" onclick="saveEvent()">שמור ונכנס ליומן</button>
+    <div class="hint">נוצרת פנייה, ונוסף אירוע ליומן Google עם התראה בטלפון.</div>
   </div>
 </div>
 
@@ -144,7 +191,7 @@
 <script>
 const DEPTS = ['חינוך','הנדסה','רווחה','תברואה','אחר'];
 const TABS = [
-  {k:'open', t:'פתוחות'}, {k:'urgent', t:'🔴 דחופות'}, {k:'stale', t:'⏳ תקועות'},
+  {k:'open', t:'פתוחות'}, {k:'agenda', t:'📅 יומן'}, {k:'urgent', t:'🔴 דחופות'}, {k:'stale', t:'⏳ תקועות'},
   {k:'progress', t:'בטיפול'}, {k:'done', t:'טופלו'}, {k:'all', t:'הכל'}
 ];
 let S = { items:[], templates:[], tab:'open', dept:'', cur:null };
@@ -221,7 +268,20 @@ function ageText(d){
 const isDone = i => (i.status||'').trim() === 'טופל';
 const isUrgent = i => /דחוף/.test(i.urgency||'');
 function lastTouch(i){ return parseDate(i.updated) || parseDate(i.opened); }
-const isStale = i => !isDone(i) && lastTouch(i) && (Date.now()-lastTouch(i)) > 48*36e5;
+const isEvent = i => !!(i.type||'').trim();
+const whenOf = i => parseDate(i.when);
+const isLate = i => isEvent(i) && !isDone(i) && whenOf(i) && whenOf(i) < Date.now();
+const isStale = i => !isDone(i) && !isEvent(i) && lastTouch(i) && (Date.now()-lastTouch(i)) > 48*36e5;
+function evTitle(i){ return String(i.summary||'').split(' – ')[0] || i.type; }
+function whenText(i){
+  const d = whenOf(i); if(!d) return '';
+  const t = new Date(); t.setHours(0,0,0,0);
+  const day = Math.round((new Date(d).setHours(0,0,0,0) - t)/864e5);
+  const hm = String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+  const names = ['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
+  const dd = day===0 ? 'היום' : day===1 ? 'מחר' : day===-1 ? 'אתמול' : (day>1 && day<7 ? 'יום ' + names[d.getDay()] : d.getDate()+'/'+(d.getMonth()+1));
+  return dd + ' ' + hm;
+}
 function esc(s){ return String(s||'').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 function digits(p){
   let d = String(p||'').replace(/[^0-9]/g,'');
@@ -243,7 +303,7 @@ async function load(){
   try{
     const d = await call('getData');
     S.items = d.items || []; S.templates = d.templates || [];
-    render();
+    render(); checkDue();
     call('getLastReport').then(r => {
       const el = document.getElementById('report');
       if(r && r.text){ el.style.display='block'; el.innerHTML = '🤖 <b>דוח העוזר האחרון</b> (' + esc(r.date) + '): ' + esc(r.text); }
@@ -259,7 +319,9 @@ function render(){
   document.getElementById('sOpen').textContent = open.length;
   document.getElementById('sUrg').textContent = open.filter(isUrgent).length;
   document.getElementById('sStale').textContent = open.filter(isStale).length;
-  document.getElementById('sToday').textContent = S.items.filter(i => (parseDate(i.opened)||0) >= today).length;
+  document.getElementById('sToday').textContent = S.items.filter(i => (parseDate(i.opened)||0) >= today && !isEvent(i)).length;
+  const tomorrow = new Date(today.getTime()+864e5);
+  document.getElementById('sAgenda').textContent = open.filter(i => isEvent(i) && whenOf(i) && whenOf(i) < tomorrow).length;
 
   document.getElementById('tabs').innerHTML = TABS.map(t =>
     `<button class="tab ${S.tab===t.k?'on':''}" onclick="S.tab='${t.k}';render()">${t.t}</button>`).join('');
@@ -270,6 +332,7 @@ function render(){
   let list = S.items.filter(i => {
     switch(S.tab){
       case 'open': return !isDone(i);
+      case 'agenda': return isEvent(i) && !isDone(i);
       case 'urgent': return !isDone(i) && isUrgent(i);
       case 'stale': return isStale(i);
       case 'progress': return (i.status||'') === 'בטיפול';
@@ -282,8 +345,10 @@ function render(){
   if(S.tab==='open' || S.tab==='urgent') list.sort((a,b) => (isUrgent(b)-isUrgent(a)) || ((lastTouch(b)||0)-(lastTouch(a)||0)));
 
   const el = document.getElementById('list');
+  if(S.tab==='agenda'){ renderAgenda(el, list); return; }
   if(!list.length){ el.innerHTML = '<div class="empty">אין פניות להצגה 🎉</div>'; return; }
   el.innerHTML = list.slice(0,200).map(i => {
+    if(isEvent(i)) return evCard(i);
     const cls = isDone(i) ? 'done' : isUrgent(i) ? 'urgent' : isStale(i) ? 'stale' : '';
     return `<div class="card ${cls}" onclick="openItem('${esc(i.id)}')">
       <div class="row1"><div class="name">${esc(displayName(i))}</div><div class="age">${ageText(lastTouch(i))}</div></div>
@@ -297,6 +362,83 @@ function render(){
       </div></div>`;
   }).join('');
 }
+
+function evCard(i){
+  return `<div class="card ev ${isLate(i)?'late':''} ${isDone(i)?'done':''}" onclick="openItem('${esc(i.id)}')">
+    <div class="row1"><div class="name">${i.type==='תזכורת'?'⏰':'🤝'} ${esc(evTitle(i))}</div><div class="when">${esc(whenText(i))}</div></div>
+    ${i.name?`<div class="sum">עם ${esc(i.name)}</div>`:''}
+    <div class="tags"><span class="tag p">${esc(i.type)}</span>${isLate(i)?'<span class="tag r">עבר המועד</span>':''}${i.msum?'<span class="tag g">📝 יש סיכום</span>':''}</div></div>`;
+}
+function renderAgenda(el, list){
+  list.sort((a,b) => (whenOf(a)||0) - (whenOf(b)||0));
+  const t0 = new Date(); t0.setHours(0,0,0,0);
+  const t1 = new Date(t0.getTime()+864e5), t2 = new Date(t0.getTime()+2*864e5);
+  const groups = [
+    ['עבר המועד – לסגור או לסכם', i => whenOf(i) && whenOf(i) < Date.now(), 'late'],
+    ['היום', i => whenOf(i) >= Date.now() && whenOf(i) < t1],
+    ['מחר', i => whenOf(i) >= t1 && whenOf(i) < t2],
+    ['בהמשך', i => whenOf(i) >= t2 || !whenOf(i)]
+  ];
+  let html = '<button class="btn" style="width:100%;margin:4px 0 6px;background:#5a32a3" onclick="openNewEvent()">➕ פגישה או תזכורת חדשה</button>';
+  groups.forEach(g => {
+    const part = list.filter(g[1]);
+    if(part.length) html += `<div class="grp ${g[2]||''}">${g[0]} (${part.length})</div>` + part.map(evCard).join('');
+  });
+  if(!list.length) html += '<div class="empty">אין פגישות או תזכורות פתוחות</div>';
+  el.innerHTML = html;
+}
+
+/* ---------- new meeting / reminder ---------- */
+let EV_KIND = 'פגישה';
+function setKind(k){
+  EV_KIND = k;
+  document.getElementById('kM').classList.toggle('on', k==='פגישה');
+  document.getElementById('kR').classList.toggle('on', k==='תזכורת');
+  document.getElementById('evRemind').value = k==='פגישה' ? '30' : '0';
+}
+function pad(n){ return String(n).padStart(2,'0'); }
+function openNewEvent(prefill){
+  const d = new Date(Date.now() + 60*6e4); d.setMinutes(d.getMinutes() < 30 ? 30 : 60, 0, 0);
+  document.getElementById('evDate').value = d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+  document.getElementById('evTime').value = pad(d.getHours())+':'+pad(d.getMinutes());
+  ['evTitle','evName','evPhone','evNotes'].forEach(k => document.getElementById(k).value = '');
+  if(prefill){ document.getElementById('evName').value = prefill.name||''; document.getElementById('evPhone').value = prefill.phone||''; }
+  document.getElementById('evDept').innerHTML = DEPTS.map(x => `<option ${x==='אחר'?'selected':''}>${x}</option>`).join('');
+  setKind('פגישה');
+  document.getElementById('evSheet').classList.add('open');
+  askNotify();
+}
+async function saveEvent(){
+  const g = k => document.getElementById(k).value.trim();
+  if(!g('evTitle')){ toast('כתוב נושא'); return; }
+  if(!g('evDate') || !g('evTime')){ toast('בחר תאריך ושעה'); return; }
+  const b = document.getElementById('evGo'); b.disabled = true;
+  try{
+    const it = await call('createEvent', EV_KIND, g('evTitle'), g('evName'), g('evPhone'), g('evDate')+'T'+g('evTime'), +g('evRemind'), g('evNotes'), g('evDept'));
+    mergeItem(it); closeSheet('evSheet'); S.tab='agenda'; render();
+    toast(EV_KIND==='פגישה' ? 'הפגישה נקבעה ✓' : 'התזכורת נשמרה ✓');
+  }catch(e){ toast('שגיאה: ' + (e.message||e)); }
+  b.disabled = false;
+}
+
+/* ---------- reminders while the app is open (the phone alert itself comes from Google Calendar) ---------- */
+function askNotify(){ try{ if(window.Notification && Notification.permission==='default') Notification.requestPermission(); }catch(e){} }
+function checkDue(){
+  let seen = {}; try{ seen = JSON.parse(localStorage.getItem('crm_seen')||'{}'); }catch(e){}
+  const now = Date.now();
+  S.items.filter(i => isEvent(i) && !isDone(i) && whenOf(i)).forEach(i => {
+    const at = whenOf(i).getTime() - (+i.remind||0)*6e4;
+    const key = i.id + '@' + i.when;
+    if(now >= at && now - whenOf(i).getTime() < 2*36e5 && !seen[key]){
+      seen[key] = 1;
+      const msg = (i.type==='תזכורת'?'⏰ ':'🤝 ') + evTitle(i) + ' – ' + whenText(i);
+      toast(msg); say(msg);
+      try{ if(window.Notification && Notification.permission==='granted') new Notification('CRM', {body: msg}); }catch(e){}
+    }
+  });
+  try{ localStorage.setItem('crm_seen', JSON.stringify(seen)); }catch(e){}
+}
+setInterval(checkDue, 60000);
 
 /* ---------- detail ---------- */
 function openItem(id){
@@ -332,12 +474,13 @@ function drawDetail(){
         <span class="tag">${esc(i.status||'חדש')}</span>
         <span class="tag">${esc(i.id)}</span>
       </div>
-      <h3>תקציר</h3><p>${esc(i.summary)}</p>
+      <h3>${isEvent(i)?'נושא':'תקציר'}</h3><p>${esc(i.summary)}</p>
       ${i.task?`<h3 style="margin-top:10px">משימה</h3><p>${esc(i.task)}</p>`:''}
       ${i.lastMsg?`<h3 style="margin-top:10px">הודעה אחרונה</h3><p>${esc(i.lastMsg)}</p>`:''}
       <h3 style="margin-top:10px">נפתח</h3><p>${esc(i.opened)} · ${esc(i.msgCount||1)} הודעות${+i.prev>0?' · '+esc(i.prev)+' פניות קודמות':''}</p>
     </div>
     ${i.actions?`<div class="sec"><h3>🤖 צעדים מומלצים</h3><p>${esc(i.actions)}</p></div>`:''}
+    ${isEvent(i)?evSections(i):''}
 
     <div class="sec">
       <h3>✍️ תשובה מוכנה</h3>
@@ -347,6 +490,7 @@ function drawDetail(){
     <div class="actions">
       <a class="btn wa" id="waBtn" href="#" onclick="sendWa(event)">💬 ${phoneOf(i)?'פתח בוואטסאפ עם התשובה':'וואטסאפ – לבחור איש קשר'}</a>
       ${phoneOf(i)?`<a class="btn ghost" href="tel:+${esc(digits(phoneOf(i)))}">📞 התקשר</a>`:''}
+      ${!isEvent(i)?`<button class="btn ghost" onclick="openNewEvent({name:S.cur.name,phone:phoneOf(S.cur)})">📅 קבע פגישה</button>`:''}
       ${i.email?`<a class="btn ghost" href="mailto:${esc(i.email)}?body=${encodeURIComponent(i.draft||'')}">✉️ מייל</a>`:''}
       <button class="btn ghost" onclick="saveDraft()">💾 שמור טיוטה</button>
       ${!isDone(i)?`<button class="btn ok" onclick="setStatus('טופל')">✅ טופל</button>`:`<button class="btn warn" onclick="setStatus('חדש')">↩️ פתח מחדש</button>`}
@@ -370,6 +514,56 @@ function drawDetail(){
       <div class="inline"><input id="note" placeholder="הוסף הערה…"><button class="btn" onclick="addNote()">הוסף</button></div>
     </div>
     <div style="height:30px"></div>`;
+}
+
+function toLocalInput(d){ return d ? d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+'T'+pad(d.getHours())+':'+pad(d.getMinutes()) : ''; }
+function evSections(i){
+  const r = String(+i.remind||0);
+  const opts = [['0','בזמן עצמו'],['10','10 דק׳ לפני'],['30','חצי שעה לפני'],['60','שעה לפני'],['120','שעתיים לפני'],['1440','יום לפני']]
+    .map(o => `<option value="${o[0]}" ${o[0]===r?'selected':''}>${o[1]}</option>`).join('');
+  return `<div class="sec">
+      <h3>📅 מועד ${isLate(i)?'<span class="tag r">עבר</span>':''}</h3>
+      <p style="font-weight:700;color:#5a32a3">${esc(i.when)} · ${esc(whenText(i))}</p>
+      <div class="two" style="margin-top:8px"><input id="evWhen" type="datetime-local" value="${toLocalInput(whenOf(i))}"><select id="evRem2" style="flex:.8">${opts}</select></div>
+      <button class="btn ghost" style="width:100%;margin-top:8px" onclick="reschedule()">🔁 עדכן מועד ותזכורת</button>
+    </div>
+    <div class="sec">
+      <h3>📝 סיכום ${i.type==='תזכורת'?'':'פגישה'}</h3>
+      ${i.msum?`<div class="msum">${esc(i.msum)}</div>`:''}
+      <div class="inline" style="align-items:flex-start">
+        <button class="mic sm" id="sumMic" onclick="dictate('sumNotes','sumMic')">🎤</button>
+        <textarea id="sumNotes" style="min-height:90px" placeholder="${i.msum?'להוסיף עוד…':'מה דובר? מה סוכם? מה צריך לעשות? אפשר להכתיב'}"></textarea>
+      </div>
+      <button class="btn" style="width:100%;margin-top:8px;background:#5a32a3" id="sumGo" onclick="summarize()">✨ סכם עם Claude</button>
+      <div class="hint">Claude יכתוב סיכום, החלטות ומשימות המשך, ויכין הודעת סיכום לשליחה בוואטסאפ.</div>
+    </div>`;
+}
+async function reschedule(){
+  const v = document.getElementById('evWhen').value;
+  if(!v){ toast('בחר מועד'); return; }
+  try{ const u = await call('rescheduleEvent', S.cur.id, S.cur.row, v, +document.getElementById('evRem2').value); Object.assign(S.cur, u); drawDetail(); toast('המועד עודכן ✓'); }
+  catch(e){ toast('שגיאה: ' + (e.message||e)); }
+}
+async function summarize(){
+  const ta = document.getElementById('sumNotes'), notes = ta.value.trim();
+  if(!notes){ toast('כתוב או הכתב מה היה בפגישה'); return; }
+  const b = document.getElementById('sumGo'); b.disabled = true; b.textContent = 'מסכם…';
+  const full = S.cur.msum ? (S.cur.msum + '\n\nתוספת: ' + notes) : notes;
+  try{ const u = await call('saveMeetingSummary', S.cur.id, S.cur.row, full); Object.assign(S.cur, u); drawDetail(); toast('הסיכום נשמר ✓ – ההודעה מוכנה למטה'); }
+  catch(e){ toast('שגיאה: ' + (e.message||e)); b.disabled = false; b.textContent = '✨ סכם עם Claude'; }
+}
+let DREC = null;
+function dictate(targetId, btnId){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const btn = document.getElementById(btnId), ta = document.getElementById(targetId);
+  if(!SR){ toast('אפשר להשתמש במיקרופון של המקלדת'); ta.focus(); return; }
+  if(DREC){ try{DREC.stop()}catch(e){}; return; }
+  const base = ta.value ? ta.value + ' ' : '';
+  DREC = new SR(); DREC.lang = 'he-IL'; DREC.interimResults = true; DREC.continuous = true;
+  DREC.onresult = e => { ta.value = base + Array.from(e.results).map(r=>r[0].transcript).join(' '); };
+  DREC.onerror = () => {};
+  DREC.onend = () => { btn.classList.remove('on'); DREC = null; };
+  try{ DREC.start(); btn.classList.add('on'); }catch(e){ DREC = null; }
 }
 
 function useTpl(k){
@@ -511,13 +705,17 @@ const DEMO = {
     items: [
       {row:5,id:'P-1',opened:'07/11/2026 08:10:00',updated:'07/11/2026 09:00:00',name:'יסמין ולקומיר',phone:'',dept:'תברואה',summary:'בקשה לריסוס בגן מפרשית – הילדים חוזרים עקוצים',task:'לבדוק מועד ריסוס',status:'חדש',urgency:'רגיל',draft:'בוקר טוב יסמין, העברתי לתברואה.',actions:'1. להעביר לתברואה\n2. לעדכן את הפונה',log:'',msgCount:'2',prev:'1'},
       {row:4,id:'P-2',opened:'01/11/2026 10:00:00',updated:'02/11/2026 10:00:00',name:'מירית דבורה',phone:'0529330516',dept:'חינוך',summary:'פנייה דחופה בנושא שפ״ע',status:'בטיפול',urgency:'דחוף',draft:'',log:'📱 02/11 – הועבר',msgCount:'5',prev:'2'},
-      {row:3,id:'P-3',opened:'20/10/2026 10:00:00',name:'דן פנטירו',phone:'0523982771',dept:'אחר',summary:'תיאום פגישה',status:'טופל',urgency:'רגיל'}
+      {row:3,id:'P-3',opened:'20/10/2026 10:00:00',name:'דן פנטירו',phone:'0523982771',dept:'אחר',summary:'תיאום פגישה',status:'טופל',urgency:'רגיל'},
+      {row:6,id:'P-4',opened:'16/11/2026 10:00:00',name:'מיה לוי',phone:'0547710003',dept:'חינוך',summary:'פגישה על הסעות לגנים – להביא את רשימת הגנים',status:'חדש',urgency:'רגיל',type:'פגישה',when:'17/11/2026 10:00',remind:'30',msum:''}
     ]}),
   getLastReport: () => ({date:'07/11/2026 07:47', text:'3 חדשות, 1 דחופה, 40 פתוחות'}),
   updateItem: (id,row,f,n) => null,
   runCommand: (t) => ({reply:'הכנתי הודעה לדוד גביזון. סימנתי את הפנייה של יסמין כטופל.', done:[{type:'whatsapp',name:'דוד גביזון',phone:'0505553212',text:'היי דוד, האולם פנוי ביום חמישי.',options:[]},{type:'update',item:{id:'P-1',row:5,name:'יסמין ולקומיר',status:'טופל',dept:'תברואה',urgency:'רגיל',summary:'ריסוס'}}]}),
   getReports: () => ({live:{text:'📋 דוח מצב – 08/11 12:00\nפתוחות: 2 · דחופות: 1 · תקועות 48ש׳+: 1\n\n🔴 דחופות:\n🔴 מירית דבורה · חינוך – שפ״ע'}, history:[{date:'08/11/2026 10:00',text:'📋 דוח מצב – 10:00\nפתוחות: 3'}]}),
-  sendStatusReport: () => ({})
+  sendStatusReport: () => ({}),
+  createEvent: (k,t,n,p,w) => ({row:9,id:'P-9',opened:'17/11/2026 09:00:00',name:n,phone:p,summary:t,status:'חדש',type:k,when:w.replace(/(\d+)-(\d+)-(\d+)T/,'$3/$2/$1 '),remind:'30'}),
+  saveMeetingSummary: (id,r,n) => ({msum:'📝 סוכם להביא את רשימת הגנים עד יום חמישי.\n\nמשימות המשך:\n• לשלוח רשימה למיה', draft:'היי מיה, תודה על הפגישה. אשלח את רשימת הגנים עד חמישי.'}),
+  rescheduleEvent: (id,r,w) => ({when: w.replace(/(\d+)-(\d+)-(\d+)T/,'$3/$2/$1 ')})
 };
 
 load();
