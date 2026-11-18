@@ -100,6 +100,72 @@
   .msum{background:#f6f2fd;border-radius:10px;padding:10px;font-size:15px;line-height:1.55;white-space:pre-wrap;margin-bottom:8px}
   .mic.sm{width:44px;height:44px;font-size:19px}
   #sumSec{scroll-margin-top:70px}
+  /* ===== friendlier v3 ===== */
+  body{font-size:17px;padding-bottom:84px}
+  header{padding:12px 16px 12px}
+  h1{font-size:21px}
+  .stat{cursor:pointer;padding:9px 4px;border:2px solid transparent}
+  .stat b{font-size:24px}
+  .stat span{font-size:12.5px}
+  .stat.on{background:rgba(255,255,255,.28);border-color:rgba(255,255,255,.6)}
+  .search{font-size:17px;padding:13px 16px;border-radius:14px}
+  .tab{font-size:15px;padding:9px 16px}
+  .filters{display:flex;gap:8px;padding:10px 16px 2px;align-items:center}
+  .filters select{flex:1;padding:10px 12px;font-size:16px;border-radius:12px;background:#fff}
+  .filters .cnt{flex:none;font-size:14px;color:var(--muted)}
+  #list{padding:8px 16px 110px}
+  .card{padding:14px 16px;border-radius:16px;margin-bottom:12px}
+  .name{font-size:18px}
+  .age{font-size:13px}
+  .sum{font-size:16px;line-height:1.45;color:#2a3442}
+  .todo{font-size:14.5px;color:#5b4300;background:#fff6dc;border-radius:8px;padding:5px 9px;margin:-2px 0 9px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .tag{font-size:13px;padding:3px 9px}
+  .qa{display:flex;gap:8px;margin-top:12px;padding-top:10px;border-top:1px solid var(--line)}
+  .qa a,.qa button{flex:1;min-height:48px;border:0;border-radius:12px;font-size:15.5px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:5px;text-decoration:none;font-family:inherit}
+  .qa .q-wa{background:#e5f8ec;color:#11804a}
+  .qa .q-call{background:var(--chip);color:var(--brand)}
+  .qa .q-ok{background:#e3f5ec;color:var(--ok)}
+  nav.bottom{position:fixed;bottom:0;left:0;right:0;height:70px;background:#fff;border-top:1px solid var(--line);display:flex;z-index:9;box-shadow:0 -3px 12px rgba(0,0,0,.07)}
+  nav.bottom button{flex:1;border:0;background:none;font-size:12.5px;color:var(--muted);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-family:inherit}
+  nav.bottom button b{font-size:23px;font-weight:400;line-height:1}
+  nav.bottom button.on{color:var(--brand);font-weight:700}
+  nav.bottom .plus b{background:var(--brand);color:#fff;width:54px;height:54px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:30px;margin-top:-26px;box-shadow:0 5px 14px rgba(31,78,121,.45);border:4px solid #fff}
+  #toast{bottom:88px;display:flex;gap:14px;align-items:center;font-size:15px;padding:12px 20px}
+  #toast.show{pointer-events:auto}
+  #toast button{background:none;border:0;color:#8fd0ff;font-weight:800;font-size:15px;font-family:inherit}
+  .fab{display:none}
+  /* detail */
+  .dhead{padding:14px 16px}
+  .dhead h2{font-size:19px}
+  .hero{background:#fff;margin:12px 16px;border-radius:18px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+  .hero .who{font-size:23px;font-weight:800;margin-top:6px}
+  .hero .ph{font-size:15px;color:var(--muted);margin-top:2px}
+  .block{margin-top:14px}
+  .block h3{font-size:14px;color:var(--muted);margin:0 0 5px;font-weight:700}
+  .block p{font-size:17px;line-height:1.55;margin:0;white-space:pre-wrap}
+  .block.todo p{background:#fff6dc;border-radius:12px;padding:10px 12px;color:#4d3900}
+  .block.last p{background:#f2f5f9;border-radius:12px;padding:10px 12px;font-size:16px}
+  .btn{font-size:17px;padding:15px 12px;border-radius:14px}
+  .btn.wa{width:100%;margin-top:10px;font-size:18px}
+  .qrow{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 16px}
+  .qrow button,.qrow a{border:1px solid var(--line);background:#fff;border-radius:14px;padding:8px 2px;font-size:13px;font-weight:700;color:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-decoration:none;min-height:68px;font-family:inherit}
+  .qrow b{font-size:23px;font-weight:400}
+  .qrow.three{grid-template-columns:repeat(3,1fr)}
+  .qrow .okb{background:#e3f5ec;border-color:#bfe6d0;color:var(--ok)}
+  .qrow .badb{background:#fde8e6;border-color:#f6c9c4;color:var(--bad)}
+  details.sec summary{font-size:16px;font-weight:700;color:var(--brand);list-style:none;cursor:pointer;padding:2px 0}
+  details.sec summary::-webkit-details-marker{display:none}
+  details.sec summary::after{content:' ▾';color:var(--muted)}
+  details.sec[open] summary::after{content:' ▴'}
+  details.sec[open] summary{margin-bottom:10px}
+  .sec h3{font-size:14px}
+  .tpl{font-size:14px;padding:8px 12px}
+  .newgrid{display:grid;gap:10px}
+  .newgrid button{font-size:18px;padding:18px 16px;border-radius:16px;border:1px solid var(--line);background:#fff;text-align:right;font-family:inherit;display:flex;gap:12px;align-items:center}
+  .newgrid button b{font-size:28px;font-weight:400}
+  .newgrid small{display:block;font-size:13px;color:var(--muted);font-weight:400}
+  .chk{display:flex;align-items:center;gap:10px;margin-top:12px;font-size:16px}
+  .chk input{width:24px;height:24px}
 </style>
 </head>
 <body>
@@ -107,29 +173,63 @@
   <div class="top">
     <h1>📋 פניות</h1>
     <div style="display:flex;gap:6px">
-      <button class="iconbtn" onclick="openNewEvent()">➕ פגישה</button>
-      <button class="iconbtn" onclick="openReports()">📊 דוח</button>
-      <button class="iconbtn" onclick="load()">⟳</button>
+      <button class="iconbtn" onclick="load()">⟳ רענן</button>
     </div>
   </div>
   <div class="stats">
-    <div class="stat"><b id="sOpen">–</b><span>פתוחות</span></div>
-    <div class="stat red"><b id="sUrg">–</b><span>דחופות</span></div>
-    <div class="stat"><b id="sStale">–</b><span>תקועות 48ש׳+</span></div>
-    <div class="stat"><b id="sToday">–</b><span>נכנסו היום</span></div>
-    <div class="stat" onclick="S.tab='agenda';render()"><b id="sAgenda">–</b><span>📅 היום</span></div>
+    <div class="stat" id="stOpen" onclick="go('open')"><b id="sOpen">–</b><span>פתוחות</span></div>
+    <div class="stat red" id="stUrg" onclick="go('urgent')"><b id="sUrg">–</b><span>דחופות</span></div>
+    <div class="stat" id="stStale" onclick="go('stale')"><b id="sStale">–</b><span>תקועות</span></div>
+    <div class="stat" id="stToday" onclick="go('today')"><b id="sToday">–</b><span>נכנסו היום</span></div>
+    <div class="stat" id="stAgenda" onclick="go('agenda')"><b id="sAgenda">–</b><span>📅 היום</span></div>
   </div>
 </header>
 
 <div id="report"></div>
 <div class="bar"><input class="search" id="q" placeholder="🔍 חיפוש שם, טלפון או נושא…" oninput="render()"></div>
 <div class="tabs" id="tabs"></div>
-<div class="depts" id="depts"></div>
+<div class="filters"><select id="deptSel" onchange="S.dept=this.value;render()"></select><span class="cnt" id="cnt"></span></div>
 <div id="list"><div class="spin">טוען…</div></div>
 
 <div id="detail"></div>
 <div id="toast"></div>
-<button class="fab" onclick="openCmd()" aria-label="פקודה קולית">🎤</button>
+<nav class="bottom">
+  <button id="nbList" onclick="go('open')"><b>📋</b>פניות</button>
+  <button id="nbAgenda" onclick="go('agenda')"><b>📅</b>יומן</button>
+  <button class="plus" onclick="openNew()"><b>＋</b>חדש</button>
+  <button onclick="openCmd()"><b>🎤</b>פקודה קולית</button>
+  <button onclick="openReports()"><b>📊</b>דוח</button>
+</nav>
+
+<div class="sheet" id="newSheet" onclick="if(event.target===this)closeSheet('newSheet')">
+  <div class="box">
+    <h2>מה להוסיף? <button class="x" onclick="closeSheet('newSheet')">✕</button></h2>
+    <div class="newgrid">
+      <button onclick="closeSheet('newSheet');openNewTicket()"><b>📝</b><span>פנייה חדשה<small>מישהו פנה בטלפון או בעל פה</small></span></button>
+      <button onclick="closeSheet('newSheet');openNewEvent();setKind('פגישה')"><b>🤝</b><span>פגישה<small>נכנסת ליומן עם התראה, ואחריה מקליטים סיכום</small></span></button>
+      <button onclick="closeSheet('newSheet');openNewEvent();setKind('תזכורת')"><b>⏰</b><span>תזכורת<small>משהו שצריך לזכור לעשות בזמן מסוים</small></span></button>
+      <button onclick="closeSheet('newSheet');openCmd()"><b>🎤</b><span>להגיד בקול<small>"תפתח פנייה ל..." / "תקבע לי פגישה עם..."</small></span></button>
+    </div>
+  </div>
+</div>
+
+<div class="sheet" id="tkSheet" onclick="if(event.target===this)closeSheet('tkSheet')">
+  <div class="box">
+    <h2>📝 פנייה חדשה <button class="x" onclick="closeSheet('tkSheet')">✕</button></h2>
+    <div class="two">
+      <div><label class="hint">שם הפונה</label><input id="tkName" placeholder="שם"></div>
+      <div><label class="hint">טלפון</label><input id="tkPhone" type="tel" placeholder="05X-XXXXXXX"></div>
+    </div>
+    <label class="hint">מה הבקשה?</label>
+    <div class="inline" style="align-items:flex-start;margin-top:4px">
+      <button class="mic sm" id="tkMic" onclick="dictate('tkSum','tkMic')">🎙️</button>
+      <textarea id="tkSum" style="min-height:90px" placeholder="לחץ 🎙️ ודבר, או הקלד…"></textarea>
+    </div>
+    <label class="hint">מחלקה</label><select id="tkDept"></select>
+    <label class="chk"><input type="checkbox" id="tkUrg"> 🔴 דחוף</label>
+    <button class="btn" style="width:100%;margin-top:14px" id="tkGo" onclick="saveTicket()">שמור פנייה</button>
+  </div>
+</div>
 
 <div class="sheet" id="cmdSheet" onclick="if(event.target===this)closeSheet('cmdSheet')">
   <div class="box">
@@ -299,7 +399,14 @@ function firstName(i){
   const n = (i.name||'').replace(/[@#]/g,'').trim().split(/\s+/)[0];
   return n || '';
 }
-function toast(t){ const el=document.getElementById('toast'); el.textContent=t; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),1800); }
+let TOAST_T = null;
+function toast(t, actLabel, actFn, ms){
+  const el = document.getElementById('toast');
+  el.innerHTML = '<span>' + esc(t) + '</span>' + (actLabel ? '<button id="toastAct">' + esc(actLabel) + '</button>' : '');
+  if(actLabel) document.getElementById('toastAct').onclick = () => { el.classList.remove('show'); actFn(); };
+  el.classList.add('show');
+  clearTimeout(TOAST_T); TOAST_T = setTimeout(() => el.classList.remove('show'), ms || 2200);
+}
 
 /* ---------- load & render ---------- */
 async function load(){
@@ -318,20 +425,26 @@ async function load(){
   }
 }
 
+function go(tab){ S.tab = tab; document.getElementById('detail').classList.remove('open'); S.cur = null; render(); window.scrollTo(0,0); }
 function render(){
   const open = S.items.filter(i => !isDone(i));
   const today = new Date(); today.setHours(0,0,0,0);
+  const tomorrow = new Date(today.getTime()+864e5);
+  const isToday = i => (parseDate(i.opened)||0) >= today && !isEvent(i);
   document.getElementById('sOpen').textContent = open.length;
   document.getElementById('sUrg').textContent = open.filter(isUrgent).length;
   document.getElementById('sStale').textContent = open.filter(isStale).length;
-  document.getElementById('sToday').textContent = S.items.filter(i => (parseDate(i.opened)||0) >= today && !isEvent(i)).length;
-  const tomorrow = new Date(today.getTime()+864e5);
+  document.getElementById('sToday').textContent = S.items.filter(isToday).length;
   document.getElementById('sAgenda').textContent = open.filter(i => isEvent(i) && whenOf(i) && whenOf(i) < tomorrow).length;
+  [['stOpen','open'],['stUrg','urgent'],['stStale','stale'],['stToday','today'],['stAgenda','agenda']].forEach(p =>
+    document.getElementById(p[0]).classList.toggle('on', S.tab===p[1]));
+  document.getElementById('nbList').classList.toggle('on', S.tab!=='agenda');
+  document.getElementById('nbAgenda').classList.toggle('on', S.tab==='agenda');
 
   document.getElementById('tabs').innerHTML = TABS.map(t =>
-    `<button class="tab ${S.tab===t.k?'on':''}" onclick="S.tab='${t.k}';render()">${t.t}</button>`).join('');
-  document.getElementById('depts').innerHTML = ['', ...DEPTS].map(d =>
-    `<button class="tab ${S.dept===d?'on':''}" onclick="S.dept='${d}';render()">${d||'כל המחלקות'}</button>`).join('');
+    `<button class="tab ${S.tab===t.k?'on':''}" onclick="go('${t.k}')">${t.t}</button>`).join('');
+  document.getElementById('deptSel').innerHTML = ['', ...DEPTS].map(d =>
+    `<option value="${d}" ${S.dept===d?'selected':''}>${d ? 'מחלקה: ' + d : 'כל המחלקות'}</option>`).join('');
 
   const q = document.getElementById('q').value.trim();
   let list = S.items.filter(i => {
@@ -340,6 +453,7 @@ function render(){
       case 'agenda': return isEvent(i) && !isDone(i);
       case 'urgent': return !isDone(i) && isUrgent(i);
       case 'stale': return isStale(i);
+      case 'today': return isToday(i);
       case 'progress': return (i.status||'') === 'בטיפול';
       case 'done': return isDone(i);
       default: return true;
@@ -348,24 +462,75 @@ function render(){
   if(S.dept) list = list.filter(i => (i.dept||'אחר') === S.dept);
   if(q) list = list.filter(i => [i.name,i.phone,i.summary,i.task,i.lastMsg,i.id].join(' ').includes(q));
   if(S.tab==='open' || S.tab==='urgent') list.sort((a,b) => (isUrgent(b)-isUrgent(a)) || ((lastTouch(b)||0)-(lastTouch(a)||0)));
+  document.getElementById('cnt').textContent = list.length + ' ברשימה';
 
   const el = document.getElementById('list');
   if(S.tab==='agenda'){ renderAgenda(el, list); return; }
   if(!list.length){ el.innerHTML = '<div class="empty">אין פניות להצגה 🎉</div>'; return; }
-  el.innerHTML = list.slice(0,200).map(i => {
-    if(isEvent(i)) return evCard(i);
-    const cls = isDone(i) ? 'done' : isUrgent(i) ? 'urgent' : isStale(i) ? 'stale' : '';
-    return `<div class="card ${cls}" onclick="openItem('${esc(i.id)}')">
-      <div class="row1"><div class="name">${esc(displayName(i))}</div><div class="age">${ageText(lastTouch(i))}</div></div>
-      <div class="sum">${esc(i.summary || i.lastMsg)}</div>
-      <div class="tags">
-        ${isUrgent(i)?'<span class="tag r">דחוף</span>':''}
-        <span class="tag">${esc(i.dept||'אחר')}</span>
-        <span class="tag ${isDone(i)?'g':(i.status==='בטיפול'?'y':'')}">${esc(i.status||'חדש')}</span>
-        ${i.source==='Gmail'?'<span class="tag">📧 מייל</span>':''}
-        ${+i.prev>0?`<span class="tag y">פונה חוזר</span>`:''}
-      </div></div>`;
-  }).join('');
+  el.innerHTML = list.slice(0,200).map(i => isEvent(i) ? evCard(i) : ticketCard(i)).join('');
+}
+function ticketCard(i){
+  const cls = isDone(i) ? 'done' : isUrgent(i) ? 'urgent' : isStale(i) ? 'stale' : '';
+  const id = esc(i.id);
+  return `<div class="card ${cls}" onclick="openItem('${id}')">
+    <div class="row1"><div class="name">${isUrgent(i)?'🔴 ':''}${esc(displayName(i))}</div><div class="age">${ageText(lastTouch(i))}</div></div>
+    <div class="sum">${esc(i.summary || i.lastMsg)}</div>
+    ${i.task && !isDone(i) ? `<div class="todo">➡️ ${esc(String(i.task).split('\n')[0])}</div>` : ''}
+    <div class="tags">
+      <span class="tag">${esc(i.dept||'אחר')}</span>
+      <span class="tag ${isDone(i)?'g':(i.status==='בטיפול'?'y':'')}">${esc(i.status||'חדש')}</span>
+      ${i.source==='Gmail'?'<span class="tag">📧 מייל</span>':''}
+      ${+i.prev>0?`<span class="tag y">פונה חוזר</span>`:''}
+    </div>
+    ${quickRow(i)}
+  </div>`;
+}
+function quickRow(i){
+  if(isDone(i)) return '';
+  const id = esc(i.id), ph = phoneOf(i);
+  return `<div class="qa" onclick="event.stopPropagation()">
+    <a class="q-wa" target="_blank" href="${esc(waLink(i, i.draft||''))}" onclick="logQuick('${id}','נפתח וואטסאפ מהרשימה')">💬 וואטסאפ</a>
+    ${ph?`<a class="q-call" href="tel:+${esc(digits(ph))}" onclick="logQuick('${id}','חיוג מהרשימה')">📞 חיוג</a>`:''}
+    <button class="q-ok" onclick="quickDone('${id}')">✅ טופל</button>
+  </div>`;
+}
+function logQuick(id, note){
+  const i = S.items.find(x => x.id === id); if(!i) return;
+  call('updateItem', i.id, i.row, {}, note).then(u => { if(u) Object.assign(i, u); }).catch(()=>{});
+}
+async function quickDone(id){
+  const i = S.items.find(x => x.id === id); if(!i) return;
+  const prev = i.status || 'חדש';
+  i.status = 'טופל'; render();
+  toast('✅ ' + displayName(i) + ' סומן כטופל', 'בטל', () => undoDone(id, prev), 5000);
+  try{ const u = await call('updateItem', i.id, i.row, {status:'טופל'}, 'סטטוס: טופל (מהרשימה)'); if(u) Object.assign(i, u); }
+  catch(e){ i.status = prev; render(); toast('שגיאה: ' + (e.message||e)); }
+}
+async function undoDone(id, prev){
+  const i = S.items.find(x => x.id === id); if(!i) return;
+  i.status = prev; render();
+  try{ const u = await call('updateItem', i.id, i.row, {status: prev}, 'בוטל סימון טופל'); if(u) Object.assign(i, u); toast('בוטל ↩️'); }
+  catch(e){ toast('שגיאה: ' + (e.message||e)); }
+}
+
+/* ---------- new ticket ---------- */
+function openNew(){ document.getElementById('newSheet').classList.add('open'); }
+function openNewTicket(){
+  ['tkName','tkPhone','tkSum'].forEach(k => document.getElementById(k).value = '');
+  document.getElementById('tkUrg').checked = false;
+  document.getElementById('tkDept').innerHTML = DEPTS.map(x => `<option ${x==='אחר'?'selected':''}>${x}</option>`).join('');
+  document.getElementById('tkSheet').classList.add('open');
+}
+async function saveTicket(){
+  if(DREC){ try{DREC.stop()}catch(e){} }
+  const g = k => document.getElementById(k).value.trim();
+  if(!g('tkSum') && !g('tkName')){ toast('כתוב מי פנה ומה הבקשה'); return; }
+  const b = document.getElementById('tkGo'); b.disabled = true;
+  try{
+    const it = await call('createItem', g('tkName'), g('tkPhone'), g('tkDept'), g('tkSum'), document.getElementById('tkUrg').checked ? 'דחוף' : 'רגיל');
+    mergeItem(it); closeSheet('tkSheet'); go('open'); toast('הפנייה נשמרה ✓');
+  }catch(e){ toast('שגיאה: ' + (e.message||e)); }
+  b.disabled = false;
 }
 
 function evCard(i){
@@ -482,56 +647,67 @@ function waLink(i, text){
 
 function drawDetail(){
   const i = S.cur;
+  const ph = phoneOf(i);
   const tplBtns = S.templates.map((t,k) => `<button class="tpl" onclick="useTpl(${k})">${esc(t.topic)}</button>`).join('');
+  const showLast = i.lastMsg && String(i.lastMsg).trim() !== String(i.summary||'').trim();
   document.getElementById('detail').innerHTML = `
-    <div class="dhead"><button class="iconbtn" onclick="history.back()">→</button><h2>${esc(displayName(i))}</h2></div>
-    <div class="sec">
-      <div class="tags" style="margin-bottom:8px">
-        ${isUrgent(i)?'<span class="tag r">דחוף</span>':''}
+    <div class="dhead"><button class="iconbtn" onclick="history.back()">→ חזרה</button><h2>${esc(isEvent(i) ? evTitle(i) : displayName(i))}</h2></div>
+
+    <div class="hero">
+      <div class="tags">
+        ${isUrgent(i)?'<span class="tag r">🔴 דחוף</span>':''}
+        ${isEvent(i)?`<span class="tag p">${esc(i.type)}</span>`:''}
         <span class="tag">${esc(i.dept||'אחר')}</span>
-        <span class="tag">${esc(i.status||'חדש')}</span>
-        <span class="tag">${esc(i.id)}</span>
+        <span class="tag ${isDone(i)?'g':(i.status==='בטיפול'?'y':'')}">${esc(i.status||'חדש')}</span>
+        ${+i.prev>0?`<span class="tag y">פונה חוזר · ${esc(i.prev)}</span>`:''}
       </div>
-      <h3>${isEvent(i)?'נושא':'תקציר'}</h3><p>${esc(i.summary)}</p>
-      ${i.task?`<h3 style="margin-top:10px">משימה</h3><p>${esc(i.task)}</p>`:''}
-      ${i.lastMsg?`<h3 style="margin-top:10px">הודעה אחרונה</h3><p>${esc(i.lastMsg)}</p>`:''}
-      <h3 style="margin-top:10px">נפתח</h3><p>${esc(i.opened)} · ${esc(i.msgCount||1)} הודעות${+i.prev>0?' · '+esc(i.prev)+' פניות קודמות':''}</p>
+      <div class="who">${esc(displayName(i))}</div>
+      ${ph?`<div class="ph" dir="ltr" style="text-align:right">${esc(ph)}</div>`:''}
+      <div class="block"><h3>${isEvent(i)?'📌 נושא':'💬 מה רוצים'}</h3><p>${esc(i.summary || i.lastMsg || '—')}</p></div>
+      ${showLast?`<div class="block last"><h3>✉️ הודעה אחרונה · ${ageText(lastTouch(i))}</h3><p>${esc(i.lastMsg)}</p></div>`:''}
+      ${i.task?`<div class="block todo"><h3>➡️ מה לעשות</h3><p>${esc(i.task)}</p></div>`:''}
     </div>
-    ${i.actions?`<div class="sec"><h3>🤖 צעדים מומלצים</h3><p>${esc(i.actions)}</p></div>`:''}
+
     ${isEvent(i)?evSections(i):''}
 
     <div class="sec">
-      <h3>✍️ תשובה מוכנה</h3>
-      <textarea id="draft">${esc(i.draft)}</textarea>
+      <h3>✍️ התשובה שלך</h3>
+      <textarea id="draft" placeholder="כתוב תשובה, או בחר תבנית למטה…">${esc(i.draft)}</textarea>
       ${tplBtns?`<div class="tpls">${tplBtns}</div>`:''}
-    </div>
-    <div class="actions">
-      <a class="btn wa" id="waBtn" href="#" onclick="sendWa(event)">💬 ${phoneOf(i)?'פתח בוואטסאפ עם התשובה':'וואטסאפ – לבחור איש קשר'}</a>
-      ${phoneOf(i)?`<a class="btn ghost" href="tel:+${esc(digits(phoneOf(i)))}">📞 התקשר</a>`:''}
-      ${!isEvent(i)?`<button class="btn ghost" onclick="openNewEvent({name:S.cur.name,phone:phoneOf(S.cur)})">📅 קבע פגישה</button>`:''}
-      ${i.email?`<a class="btn ghost" href="mailto:${esc(i.email)}?body=${encodeURIComponent(i.draft||'')}">✉️ מייל</a>`:''}
-      <button class="btn ghost" onclick="saveDraft()">💾 שמור טיוטה</button>
-      ${!isDone(i)?`<button class="btn ok" onclick="setStatus('טופל')">✅ טופל</button>`:`<button class="btn warn" onclick="setStatus('חדש')">↩️ פתח מחדש</button>`}
-      ${i.status!=='בטיפול'&&!isDone(i)?`<button class="btn warn" onclick="setStatus('בטיפול')">⏳ בטיפול</button>`:''}
-      <button class="btn ghost" onclick="openCmd(S.cur.id)">🎤 פקודה על הפנייה</button>
-      <button class="btn ghost" onclick="toggleUrgent()">${isUrgent(i)?'⬇️ לא דחוף':'🔴 סמן דחוף'}</button>
+      <a class="btn wa" id="waBtn" href="#" onclick="sendWa(event)">💬 ${ph?'שלח בוואטסאפ':'וואטסאפ – לבחור איש קשר'}</a>
     </div>
 
-    <div class="sec">
+    <div class="qrow">
+      ${ph?`<a href="tel:+${esc(digits(ph))}"><b>📞</b>התקשר</a>`:`<button onclick="const n=document.getElementById('ph');n.closest('details').open=true;n.focus()"><b>📞</b>אין טלפון</button>`}
+      ${!isDone(i)?`<button class="okb" onclick="setStatus('טופל')"><b>✅</b>טופל</button>`:`<button onclick="setStatus('חדש')"><b>↩️</b>פתח מחדש</button>`}
+      ${i.status!=='בטיפול'&&!isDone(i)?`<button onclick="setStatus('בטיפול')"><b>⏳</b>בטיפול</button>`:`<button onclick="saveDraft()"><b>💾</b>שמור טיוטה</button>`}
+      <button class="${isUrgent(i)?'':'badb'}" onclick="toggleUrgent()"><b>${isUrgent(i)?'⬇️':'🔴'}</b>${isUrgent(i)?'לא דחוף':'דחוף'}</button>
+    </div>
+    <div class="qrow three">
+      ${!isEvent(i)?`<button onclick="openNewEvent({name:S.cur.name,phone:phoneOf(S.cur)})"><b>📅</b>קבע פגישה</button>`:`<button onclick="saveDraft()"><b>💾</b>שמור טיוטה</button>`}
+      <button onclick="openCmd(S.cur.id)"><b>🎤</b>פקודה קולית</button>
+      ${i.email?`<a href="mailto:${esc(i.email)}?body=${encodeURIComponent(i.draft||'')}"><b>✉️</b>מייל</a>`:`<button onclick="const n=document.getElementById('note');n.closest('details').open=true;n.focus()"><b>📝</b>הערה</button>`}
+    </div>
+
+    ${i.actions?`<details class="sec"><summary>🤖 צעדים מומלצים</summary><p style="font-size:16px;line-height:1.55;white-space:pre-wrap;margin:0">${esc(i.actions)}</p></details>`:''}
+
+    <details class="sec" ${!ph?'open':''}>
+      <summary>ℹ️ פרטים ושינויים</summary>
       <h3>מחלקה</h3>
       <select onchange="setField('dept', this.value, 'מחלקה: '+this.value)">
         ${DEPTS.map(d=>`<option ${d===(i.dept||'אחר')?'selected':''}>${d}</option>`).join('')}
       </select>
-      ${!phoneOf(i)?`<h3 style="margin-top:12px">טלפון (חסר)</h3>
+      ${!ph?`<h3 style="margin-top:12px">טלפון (חסר)</h3>
         <div class="inline"><input id="ph" type="tel" placeholder="05X-XXXXXXX"><button class="btn" onclick="savePhone()">שמור</button></div>`:''}
-    </div>
+      <p class="hint" style="margin-top:12px">נפתחה ${esc(i.opened)} · ${esc(i.msgCount||1)} הודעות · ${esc(i.id)}</p>
+    </details>
 
-    <div class="sec">
-      <h3>📝 תיעוד טיפול</h3>
-      <p style="font-size:14px;color:#445">${esc(i.log)||'—'}</p>
+    <details class="sec">
+      <summary>📝 תיעוד טיפול</summary>
+      <p style="font-size:15px;color:#445;white-space:pre-wrap;margin:0">${esc(i.log)||'—'}</p>
       <div class="inline"><input id="note" placeholder="הוסף הערה…"><button class="btn" onclick="addNote()">הוסף</button></div>
-    </div>
-    <div style="height:30px"></div>`;
+    </details>
+    <div style="height:40px"></div>`;
 }
 
 function toLocalInput(d){ return d ? d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+'T'+pad(d.getHours())+':'+pad(d.getMinutes()) : ''; }
@@ -738,6 +914,7 @@ const DEMO = {
   runCommand: (t) => ({reply:'הכנתי הודעה לדוד גביזון. סימנתי את הפנייה של יסמין כטופל.', done:[{type:'whatsapp',name:'דוד גביזון',phone:'0505553212',text:'היי דוד, האולם פנוי ביום חמישי.',options:[]},{type:'update',item:{id:'P-1',row:5,name:'יסמין ולקומיר',status:'טופל',dept:'תברואה',urgency:'רגיל',summary:'ריסוס'}}]}),
   getReports: () => ({live:{text:'📋 דוח מצב – 08/11 12:00\nפתוחות: 2 · דחופות: 1 · תקועות 48ש׳+: 1\n\n🔴 דחופות:\n🔴 מירית דבורה · חינוך – שפ״ע'}, history:[{date:'08/11/2026 10:00',text:'📋 דוח מצב – 10:00\nפתוחות: 3'}]}),
   sendStatusReport: () => ({}),
+  createItem: (n,p,d,s,u) => ({row:20,id:'P-20',opened:'18/11/2026 09:00:00',name:n,phone:p,dept:d,summary:s,status:'חדש',urgency:u}),
   createEvent: (k,t,n,p,w) => ({row:9,id:'P-9',opened:'17/11/2026 09:00:00',name:n,phone:p,summary:t,status:'חדש',type:k,when:w.replace(/(\d+)-(\d+)-(\d+)T/,'$3/$2/$1 '),remind:'30'}),
   saveMeetingSummary: (id,r,n) => ({msum:'📝 סוכם להביא את רשימת הגנים עד יום חמישי.\n\nמשימות המשך:\n• לשלוח רשימה למיה', draft:'היי מיה, תודה על הפגישה. אשלח את רשימת הגנים עד חמישי.'}),
   rescheduleEvent: (id,r,w) => ({when: w.replace(/(\d+)-(\d+)-(\d+)T/,'$3/$2/$1 ')})
