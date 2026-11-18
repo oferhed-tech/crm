@@ -184,7 +184,7 @@
 <body>
 <header>
   <div class="top">
-    <h1>📋 פניות</h1>
+    <h1 id="hdrT">📋 פניות</h1>
     <div style="display:flex;gap:6px">
       <button class="iconbtn" onclick="load()">⟳ רענן</button>
     </div>
@@ -439,7 +439,7 @@ async function load(){
   }
 }
 
-function go(tab){ S.tab = tab; if(!WIDE()){ document.getElementById('detail').classList.remove('open'); S.cur = null; } render(); window.scrollTo(0,0); }
+function go(tab){ S.tab = tab; const h=document.getElementById('hdrT'); if(h) h.textContent = tab==='agenda' ? '📅 יומן' : '📋 פניות'; if(!WIDE()){ document.getElementById('detail').classList.remove('open'); S.cur = null; } render(); window.scrollTo(0,0); }
 function render(){
   const open = S.items.filter(i => !isDone(i));
   const today = new Date(); today.setHours(0,0,0,0);
