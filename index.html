@@ -125,6 +125,7 @@
   .qa .q-wa{background:#e5f8ec;color:#11804a}
   .qa .q-call{background:var(--chip);color:var(--brand)}
   .qa .q-ok{background:#e3f5ec;color:var(--ok)}
+  .qa .q-nr{flex:0 0 64px;background:#f1f2f5;color:#6b7686;font-size:13px;flex-direction:column;gap:0;line-height:1.1}
   nav.bottom{position:fixed;bottom:0;left:0;right:0;height:70px;background:#fff;border-top:1px solid var(--line);display:flex;z-index:9;box-shadow:0 -3px 12px rgba(0,0,0,.07)}
   nav.bottom button{flex:1;border:0;background:none;font-size:12.5px;color:var(--muted);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-family:inherit}
   nav.bottom button b{font-size:23px;font-weight:400;line-height:1}
@@ -533,6 +534,7 @@ function quickRow(i){
       `<a class="q-wa" target="_blank" href="${esc(waLink(i, i.draft||''))}" onclick="logQuick('${id}','נפתח וואטסאפ מהרשימה')">💬 וואטסאפ</a>`}
     ${ph?`<a class="q-call" href="tel:+${esc(digits(ph))}" onclick="logQuick('${id}','חיוג מהרשימה')">📞 חיוג</a>`:''}
     <button class="q-ok" onclick="quickDone('${id}')">✅ טופל</button>
+    <button class="q-nr" onclick="markIrrelevant('${id}')" title="לא רלוונטי – לארכיון">🚫<span>לא רלוונטי</span></button>
   </div>`;
 }
 function logQuick(id, note){
@@ -864,11 +866,11 @@ async function save(fields, note, msg){
   }
 }
 function saveDraft(){ return save({draft: document.getElementById('draft').value}, '', 'הטיוטה נשמרה ✓'); }
-async function markIrrelevant(){
-  const i = S.cur; if(!i) return;
+async function markIrrelevant(id){
+  const i = id ? S.items.find(x => x.id === id) : S.cur; if(!i) return;
   const prev = i.status || 'חדש', idx = S.items.indexOf(i);
   S.items = S.items.filter(x => x !== i);
-  closeItem();
+  if(S.cur && S.cur.id === i.id) closeItem(); else render();
   toast('🚫 ' + displayName(i) + ' – לא רלוונטי, עובר לארכיון', 'בטל', async () => {
     try{
       const u = await call('updateItem', i.id, i.row, {status: prev}, 'בוטל סימון לא רלוונטי');
