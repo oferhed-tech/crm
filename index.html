@@ -151,6 +151,7 @@
   .qrow button,.qrow a{border:1px solid var(--line);background:#fff;border-radius:14px;padding:8px 2px;font-size:13px;font-weight:700;color:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-decoration:none;min-height:68px;font-family:inherit}
   .qrow b{font-size:23px;font-weight:400}
   .qrow.three{grid-template-columns:repeat(3,1fr)}
+  .nrb{display:block;width:calc(100% - 32px);margin:4px 16px 12px;padding:12px;border:1px dashed #c9ced6;background:#f6f7f9;color:#6b7686;border-radius:14px;font-size:15px;font-weight:700;font-family:inherit}
   .qrow .okb{background:#e3f5ec;border-color:#bfe6d0;color:var(--ok)}
   .qrow .badb{background:#fde8e6;border-color:#f6c9c4;color:var(--bad)}
   details.sec summary{font-size:16px;font-weight:700;color:var(--brand);list-style:none;cursor:pointer;padding:2px 0}
@@ -382,6 +383,7 @@ function ageText(d){
   return days === 1 ? 'אתמול' : 'לפני ' + days + ' ימים';
 }
 const isDone = i => (i.status||'').trim() === 'טופל';
+const isNR = i => (i.status||'').trim() === 'לא רלוונטי';
 const isUrgent = i => /דחוף/.test(i.urgency||'');
 function lastTouch(i){ return parseDate(i.updated) || parseDate(i.opened); }
 const isEvent = i => !!(i.type||'').trim();
@@ -427,7 +429,7 @@ async function load(){
   document.getElementById('list').innerHTML = '<div class="spin">טוען…</div>';
   try{
     const d = await call('getData');
-    S.items = d.items || []; S.templates = d.templates || [];
+    S.items = (d.items || []).filter(i => !isNR(i)); S.templates = d.templates || [];
     render(); checkDue(); drawEmpty();
     if (OPEN_ID && S.items.some(i => i.id === OPEN_ID)) openItem(OPEN_ID);
     call('getLastReport').then(r => {
@@ -710,6 +712,7 @@ function drawDetail(){
       <button onclick="openCmd(S.cur.id)"><b>🎤</b>פקודה קולית</button>
       ${i.email?`<a href="mailto:${esc(i.email)}?body=${encodeURIComponent(i.draft||'')}"><b>✉️</b>מייל</a>`:`<button onclick="const n=document.getElementById('note');n.closest('details').open=true;n.focus()"><b>📝</b>הערה</button>`}
     </div>
+    ${!isDone(i)?`<button class="nrb" onclick="markIrrelevant()">🚫 לא רלוונטי – להעביר לארכיון</button>`:''}
 
     ${i.actions?`<details class="sec"><summary>🤖 צעדים מומלצים</summary><p style="font-size:16px;line-height:1.55;white-space:pre-wrap;margin:0">${esc(i.actions)}</p></details>`:''}
 
@@ -814,6 +817,21 @@ async function save(fields, note, msg){
   }
 }
 function saveDraft(){ return save({draft: document.getElementById('draft').value}, '', 'הטיוטה נשמרה ✓'); }
+async function markIrrelevant(){
+  const i = S.cur; if(!i) return;
+  const prev = i.status || 'חדש', idx = S.items.indexOf(i);
+  S.items = S.items.filter(x => x !== i);
+  closeItem();
+  toast('🚫 ' + displayName(i) + ' – לא רלוונטי, עובר לארכיון', 'בטל', async () => {
+    try{
+      const u = await call('updateItem', i.id, i.row, {status: prev}, 'בוטל סימון לא רלוונטי');
+      if(u) Object.assign(i, u);
+      S.items.splice(Math.max(idx,0), 0, i); render(); toast('בוטל ↩️');
+    }catch(e){ toast(String(e.message||e).includes('NOT_FOUND') ? 'כבר עבר לארכיון – אפשר לשחזר מלשונית ארכיון בגיליון' : 'שגיאה: ' + (e.message||e)); }
+  }, 6000);
+  try{ await call('updateItem', i.id, i.row, {status:'לא רלוונטי'}, 'סטטוס: לא רלוונטי'); }
+  catch(e){ S.items.splice(Math.max(idx,0), 0, i); render(); toast('שגיאה: ' + (e.message||e)); }
+}
 function setStatus(s){ return save({status: s}, 'סטטוס: ' + s, s==='טופל'?'סומן כטופל ✅':'עודכן ✓'); }
 function toggleUrgent(){ const u = isUrgent(S.cur) ? 'רגיל' : 'דחוף'; return save({urgency: u}, 'דחיפות: ' + u); }
 function setField(k, v, note){ return save({[k]: v}, note); }
@@ -878,6 +896,7 @@ async function sendCmd(){
     (r.done||[]).forEach((a,k) => {
       if(a.type==='update' && a.item){
         mergeItem(a.item);
+        if(isNR(a.item)) S.items = S.items.filter(x => x.id !== a.item.id);
         html += `<div class="res">✅ עודכן: <b>${esc(displayName(a.item))}</b> – ${esc(a.item.status)} · ${esc(a.item.dept)}${isUrgent(a.item)?' · דחוף':''}
           <button class="btn ghost" onclick="closeSheet('cmdSheet');openItem('${jsq(a.item.id)}')">פתח פנייה</button></div>`;
       } else if(a.type==='create' && a.item){
