@@ -151,6 +151,11 @@
   .qrow button,.qrow a{border:1px solid var(--line);background:#fff;border-radius:14px;padding:8px 2px;font-size:13px;font-weight:700;color:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-decoration:none;min-height:68px;font-family:inherit}
   .qrow b{font-size:23px;font-weight:400}
   .qrow.three{grid-template-columns:repeat(3,1fr)}
+  .plist{display:flex;flex-direction:column;gap:8px}
+  .prow{display:block;width:100%;text-align:right;border:1px solid var(--line);background:#fff;border-radius:12px;padding:10px 12px;font-family:inherit;font-size:15px;color:var(--ink)}
+  .prow small{display:block;color:#6b7686;font-size:12px;margin-top:3px}
+  .prow.cur{border-color:#9fb3c8;background:#eaf1f8}
+  .more{font-size:14px;color:#445;margin-top:4px}
   .nrb{display:block;width:calc(100% - 32px);margin:4px 16px 12px;padding:12px;border:1px dashed #c9ced6;background:#f6f7f9;color:#6b7686;border-radius:14px;font-size:15px;font-weight:700;font-family:inherit}
   .qrow .okb{background:#e3f5ec;border-color:#bfe6d0;color:var(--ok)}
   .qrow .badb{background:#fde8e6;border-color:#f6c9c4;color:var(--bad)}
@@ -309,7 +314,7 @@ const TABS = [
   {k:'open', t:'פתוחות'}, {k:'agenda', t:'📅 יומן'}, {k:'urgent', t:'🔴 דחופות'}, {k:'stale', t:'⏳ תקועות'},
   {k:'progress', t:'בטיפול'}, {k:'done', t:'טופלו'}, {k:'all', t:'הכל'}
 ];
-let S = { items:[], templates:[], tab:'open', dept:'', cur:null };
+let S = { items:[], templates:[], tab:'open', dept:'', cur:null, hist:{} };
 
 /* ---------- server bridge: the page talks to the Apps Script "engine" ---------- */
 const CFG = (() => {
@@ -403,6 +408,14 @@ function whenText(i){
 }
 function jsq(s){ return esc(String(s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\r?\n/g,'\\n')); }
 function esc(s){ return String(s||'').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+// one key per person: last 9 digits of the phone, otherwise the name
+function personKey(i){
+  const d = String(phoneOf(i)||'').replace(/[^0-9]/g,'');
+  if(d.length >= 9) return 'p' + d.slice(-9);
+  const n = String(i.name||'').replace(/[@#~"'.,\-]/g,' ').replace(/\s+/g,' ').trim();
+  return n ? 'n' + n : '';
+}
+function samePerson(i){ const k = personKey(i); return k ? S.items.filter(x => x.id !== i.id && !isEvent(x) && personKey(x) === k) : []; }
 function digits(p){
   let d = String(p||'').replace(/[^0-9]/g,'');
   if(!d) return '';
@@ -478,6 +491,15 @@ function render(){
   if(S.dept) list = list.filter(i => (i.dept||'אחר') === S.dept);
   if(q) list = list.filter(i => [i.name,i.phone,i.summary,i.task,i.lastMsg,i.id].join(' ').includes(q));
   if(S.tab==='open' || S.tab==='urgent') list.sort((a,b) => (isUrgent(b)-isUrgent(a)) || ((lastTouch(b)||0)-(lastTouch(a)||0)));
+  if(S.tab!=='agenda'){ // a person with several tickets = one card
+    const seen = {};
+    list = list.filter(i => {
+      if(isEvent(i)) return true;
+      const k = personKey(i); if(!k){ i._more = []; return true; }
+      if(seen[k]){ seen[k]._more.push(i); return false; }
+      i._more = []; seen[k] = i; return true;
+    });
+  }
   document.getElementById('cnt').textContent = list.length + ' ברשימה';
 
   const el = document.getElementById('list');
@@ -491,8 +513,10 @@ function ticketCard(i){
   return `<div class="card ${cls} ${S.cur&&S.cur.id===i.id?'sel':''}" onclick="openItem('${id}')">
     <div class="row1"><div class="name">${isUrgent(i)?'🔴 ':''}${esc(displayName(i))}</div><div class="age">${ageText(lastTouch(i))}</div></div>
     <div class="sum">${esc(i.summary || i.lastMsg)}</div>
+    ${(i._more||[]).slice(0,3).map(o => `<div class="more">➕ ${esc(String(o.summary||o.lastMsg||'').slice(0,70))} · ${esc(o.status||'חדש')}</div>`).join('')}
     ${i.task && !isDone(i) ? `<div class="todo">➡️ ${esc(String(i.task).split('\n')[0])}</div>` : ''}
     <div class="tags">
+      ${(i._more||[]).length?`<span class="tag p">📂 ${i._more.length+1} פניות של הפונה</span>`:''}
       <span class="tag">${esc(i.dept||'אחר')}</span>
       <span class="tag ${isDone(i)?'g':(i.status==='בטיפול'?'y':'')}">${esc(i.status||'חדש')}</span>
       ${i.source==='Gmail'?'<span class="tag">📧 מייל</span>':''}
@@ -646,6 +670,7 @@ function openItem(id, record){
   S.cur = S.items.find(i => i.id === id);
   if(!S.cur) return;
   drawDetail();
+  if(!isEvent(S.cur) && personKey(S.cur)) loadPersonHistory(S.cur);
   document.getElementById('detail').classList.add('open');
   if(WIDE()){ document.getElementById('detail').scrollTop = 0; render(); }
   else history.pushState({d:1}, '');
@@ -714,6 +739,8 @@ function drawDetail(){
     </div>
     ${!isDone(i)?`<button class="nrb" onclick="markIrrelevant()">🚫 לא רלוונטי – להעביר לארכיון</button>`:''}
 
+    ${!isEvent(i) && personKey(i) ? `<details class="sec" open id="personSec"><summary>📂 כל הפניות של הפונה</summary><div class="plist" id="personList">${personRows(i)}</div><div class="plist" id="personArch" style="margin-top:8px"><div class="hint">טוען פניות קודמות מהארכיון…</div></div></details>` : ''}
+
     ${i.actions?`<details class="sec"><summary>🤖 צעדים מומלצים</summary><p style="font-size:16px;line-height:1.55;white-space:pre-wrap;margin:0">${esc(i.actions)}</p></details>`:''}
 
     <details class="sec" ${!ph?'open':''}>
@@ -735,6 +762,26 @@ function drawDetail(){
     <div style="height:40px"></div>`;
 }
 
+function personRows(i){
+  const others = samePerson(i);
+  return [i, ...others].sort((a,b) => (parseD(b.opened)||0) - (parseD(a.opened)||0)).map(o =>
+    `<button class="prow ${o.id===i.id?'cur':''}" onclick="${o.id===i.id?'':`openItem('${jsq(o.id)}')`}">${esc(String(o.summary||o.lastMsg||'—').slice(0,90))}<small>${esc(String(o.opened||'').slice(0,10))} · ${esc(o.status||'חדש')} · ${esc(o.dept||'אחר')}${o.id===i.id?' · הפנייה הזו':''}</small></button>`).join('');
+}
+function parseD(s){ const m = /(\d{1,2})\/(\d{1,2})\/(\d{4})/.exec(String(s||'')); return m ? new Date(+m[3], +m[2]-1, +m[1]) : null; }
+async function loadPersonHistory(i){
+  const k = personKey(i), box = () => document.getElementById('personArch');
+  const show = rows => {
+    const b = box(); if(!b || !S.cur || personKey(S.cur) !== k) return;
+    const have = new Set(S.items.map(x => x.id));
+    rows = (rows||[]).filter(r => !have.has(r.id)).sort((a,b) => (parseD(b.opened)||0) - (parseD(a.opened)||0));
+    b.innerHTML = rows.length ? '<div class="hint">🗄️ מהארכיון:</div>' + rows.map(r =>
+      `<div class="prow">${esc(String(r.summary||'—').slice(0,110))}<small>${esc(String(r.opened||'').slice(0,10))} · ${esc(r.status||'')} · ${esc(r.dept||'')}</small></div>`).join('')
+      : '<div class="hint">אין פניות קודמות בארכיון</div>';
+  };
+  if(S.hist[k]) return show(S.hist[k]);
+  try{ S.hist[k] = await call('getPersonHistory', i.name || '', phoneOf(i) || ''); show(S.hist[k]); }
+  catch(e){ const b = box(); if(b) b.innerHTML = '<div class="hint">לא ניתן לטעון את הארכיון כרגע</div>'; }
+}
 function toLocalInput(d){ return d ? d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+'T'+pad(d.getHours())+':'+pad(d.getMinutes()) : ''; }
 function evSections(i){
   const r = String(+i.remind||0);
@@ -961,6 +1008,7 @@ const DEMO = {
     ]}),
   getLastReport: () => ({date:'07/11/2026 07:47', text:'3 חדשות, 1 דחופה, 40 פתוחות'}),
   updateItem: (id,row,f,n) => null,
+  getPersonHistory: () => [{id:'P-OLD1',opened:'03/09/2026 10:00:00',status:'טופל',dept:'חינוך',summary:'פנייה ישנה לדוגמה – הסעות לגן'}],
   runCommand: (t) => ({reply:'הכנתי הודעה לדוד גביזון. סימנתי את הפנייה של יסמין כטופל.', done:[{type:'whatsapp',name:'דוד גביזון',phone:'0505553212',text:'היי דוד, האולם פנוי ביום חמישי.',options:[]},{type:'update',item:{id:'P-1',row:5,name:'יסמין ולקומיר',status:'טופל',dept:'תברואה',urgency:'רגיל',summary:'ריסוס'}}]}),
   getReports: () => ({live:{text:'📋 דוח מצב – 08/11 12:00\nפתוחות: 2 · דחופות: 1 · תקועות 48ש׳+: 1\n\n🔴 דחופות:\n🔴 מירית דבורה · חינוך – שפ״ע'}, history:[{date:'08/11/2026 10:00',text:'📋 דוח מצב – 10:00\nפתוחות: 3'}]}),
   sendStatusReport: () => ({}),
