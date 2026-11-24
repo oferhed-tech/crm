@@ -1032,6 +1032,8 @@ const DEMO = {
 };
 
 load();
+// shortcut: ...crm/?mic opens the voice-command screen and starts the microphone
+if (/[?&]mic\b/.test(location.search)) { setTimeout(() => { try { openCmd(); toggleMic(); } catch(e) {} }, 400); }
 </script>
 </body>
 </html>
