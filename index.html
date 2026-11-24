@@ -312,9 +312,10 @@
 <script>
 const DEPTS = ['חינוך','הנדסה','רווחה','תברואה','אחר'];
 const TABS = [
-  {k:'open', t:'פתוחות'}, {k:'agenda', t:'📅 יומן'}, {k:'urgent', t:'🔴 דחופות'}, {k:'stale', t:'⏳ תקועות'},
+  {k:'open', t:'פתוחות'}, {k:'eli', t:'⭐ אלי'}, {k:'agenda', t:'📅 יומן'}, {k:'urgent', t:'🔴 דחופות'}, {k:'stale', t:'⏳ תקועות'},
   {k:'progress', t:'בטיפול'}, {k:'done', t:'טופלו'}, {k:'all', t:'הכל'}
 ];
+const isEli = i => String(i.source||'') === 'אלי' || /אלי יריב/.test(String(i.name||''));
 let S = { items:[], templates:[], tab:'open', dept:'', cur:null, hist:{} };
 
 /* ---------- server bridge: the page talks to the Apps Script "engine" ---------- */
@@ -485,14 +486,15 @@ function render(){
       case 'stale': return isStale(i);
       case 'today': return isToday(i);
       case 'progress': return (i.status||'') === 'בטיפול';
+      case 'eli': return !isDone(i) && isEli(i);
       case 'done': return isDone(i);
       default: return true;
     }
   });
   if(S.dept) list = list.filter(i => (i.dept||'אחר') === S.dept);
   if(q) list = list.filter(i => [i.name,i.phone,i.summary,i.task,i.lastMsg,i.id].join(' ').includes(q));
-  if(S.tab==='open' || S.tab==='urgent') list.sort((a,b) => (isUrgent(b)-isUrgent(a)) || ((lastTouch(b)||0)-(lastTouch(a)||0)));
-  if(S.tab!=='agenda'){ // a person with several tickets = one card
+  if(S.tab!=='agenda') list.sort((a,b) => (lastTouch(b)||0)-(lastTouch(a)||0)); // newest update first
+  if(S.tab!=='agenda' && S.tab!=='eli'){ // a person with several tickets = one card
     const seen = {};
     list = list.filter(i => {
       if(isEvent(i)) return true;
@@ -505,6 +507,7 @@ function render(){
 
   const el = document.getElementById('list');
   if(S.tab==='agenda'){ renderAgenda(el, list); return; }
+  if(S.tab==='eli'){ el.innerHTML = '<button class="btn" style="width:100%;margin:4px 0 6px;background:#c9372c" onclick="openEliTask()">➕ משימה חדשה מאלי</button>' + (list.length ? list.slice(0,200).map(ticketCard).join('') : '<div class="empty">אין משימות פתוחות מאלי</div>'); return; }
   if(!list.length){ el.innerHTML = '<div class="empty">אין פניות להצגה 🎉</div>'; return; }
   el.innerHTML = list.slice(0,200).map(i => isEvent(i) ? evCard(i) : ticketCard(i)).join('');
 }
@@ -563,6 +566,13 @@ function openNewTicket(){
   document.getElementById('tkUrg').checked = false;
   document.getElementById('tkDept').innerHTML = DEPTS.map(x => `<option ${x==='אחר'?'selected':''}>${x}</option>`).join('');
   document.getElementById('tkSheet').classList.add('open');
+}
+function openEliTask(){
+  openNewTicket();
+  document.getElementById('tkName').value = 'אלי יריב';
+  document.getElementById('tkPhone').value = '0505255020';
+  document.getElementById('tkUrg').checked = true;
+  setTimeout(() => { const s = document.getElementById('tkSum'); if (s) s.focus(); }, 50);
 }
 async function saveTicket(){
   if(DREC){ try{DREC.stop()}catch(e){} }
