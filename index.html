@@ -315,7 +315,8 @@ const TABS = [
   {k:'open', t:'פתוחות'}, {k:'eli', t:'⭐ אלי'}, {k:'agenda', t:'📅 יומן'}, {k:'urgent', t:'🔴 דחופות'}, {k:'stale', t:'⏳ תקועות'},
   {k:'progress', t:'בטיפול'}, {k:'done', t:'טופלו'}, {k:'all', t:'הכל'}
 ];
-const isEli = i => String(i.source||'') === 'אלי' || /אלי יריב/.test(String(i.name||''));
+const ELI_PH = ['505255020','535403575'];
+const isEli = i => String(i.source||'') === 'אלי' || String(i.name||'').trim() === 'אלי יריב' || ELI_PH.some(p => String(i.phone||'').replace(/\D/g,'').endsWith(p));
 let S = { items:[], templates:[], tab:'open', dept:'', cur:null, hist:{} };
 
 /* ---------- server bridge: the page talks to the Apps Script "engine" ---------- */
